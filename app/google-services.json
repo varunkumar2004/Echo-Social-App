@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "404197614066",
+    "firebase_url": "https://trelloclone-1a699-default-rtdb.firebaseio.com",
+    "project_id": "trelloclone-1a699",
+    "storage_bucket": "trelloclone-1a699.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:404197614066:android:b67bf4a176d8f52b3dcb6b",
+        "android_client_info": {
+          "package_name": "com.example.trelloclone"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXo_4-DkQ2mZKcbi58ghX0RXJ_3tsXQxg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:404197614066:android:3709ae8db47d55d33dcb6b",
+        "android_client_info": {
+          "package_name": "com.varunkumar.echo_social_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXo_4-DkQ2mZKcbi58ghX0RXJ_3tsXQxg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
