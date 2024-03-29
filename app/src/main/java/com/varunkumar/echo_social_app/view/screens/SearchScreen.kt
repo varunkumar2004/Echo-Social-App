@@ -1,7 +1,6 @@
 package com.varunkumar.echo_social_app.view.screens
 
-import android.util.Log
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
@@ -24,18 +22,14 @@ import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,28 +45,16 @@ fun SearchScreen(
     val searchText by searchViewModel.searchText.collectAsState()
     val isSearching by searchViewModel.isSearching.collectAsState()
     val user by searchViewModel.user.collectAsState(null)
-    val focusRequester = remember {
-        FocusRequester()
-    }
 
     Scaffold(
         topBar = {
-            Box(contentAlignment = Alignment.CenterStart) {
-                IconButton(
-                    modifier = Modifier.align(Alignment.CenterStart),
-                    onClick = {
-                        backButton()
-                    }
-                ) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back to Home")
+            ActionBar(
+                leadingIcon = Icons.Default.ArrowBack,
+                header = "Search",
+                onClickLeadingIcon = {
+                    backButton()
                 }
-
-                Text(
-                    text = "Search",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-            }
+            )
         }
     ) {
         Column(
@@ -81,30 +63,15 @@ fun SearchScreen(
                 .padding(it)
                 .padding(vertical = 10.dp, horizontal = 20.dp)
         ) {
-            OutlinedTextField(
-                value = searchText,
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = null
-                    )
-                },
-                shape = RoundedCornerShape(10.dp),
-                onValueChange = {str ->
-                    if (str.isNotEmpty()) {
-                        Log.d("string", str)
-                        searchViewModel.onSearchTextChange(str)
-                    }
-                },
-                keyboardActions = KeyboardActions(onSearch = {
-                    focusRequester.freeFocus()
-                    searchViewModel.onSearchTextChange(searchText)
-                }),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester),
-                placeholder = { Text(text = "search for user") }
-            )
+            RoundTextField(
+                header = null,
+                singleLine = true,
+                trailingIcon = Icons.Default.Search,
+                onClickTrailingIcon = {
+                }
+            ) { str ->
+                // TODO search
+            }
 
             if (isSearching) {
                 Column(
@@ -144,9 +111,9 @@ fun SearchScreen(
                 }
 
                 LazyColumn {
-                    items(searches) {
+                    items(searches) {user ->
                         SearchItem(
-                            user = it,
+                            user = user,
                             modifier = Modifier.fillMaxWidth(),
                             buffered = true
                         ) {
@@ -173,10 +140,11 @@ fun SearchItem(
     buffered: Boolean = false,
     onClick: () -> Unit
 ) {
+    val radius = RoundedCornerShape(40.dp)
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color.LightGray)
+            .clip(radius)
+            .border(1.dp, Color.LightGray, radius)
             .clickable { onClick() }
     ) {
         Row(
@@ -211,7 +179,6 @@ var searches = listOf(
         bio = "I love coding!",
         email = "john@example.com",
         image = "profile.jpg",
-        posts = 5,
         followers = 100,
         following = 50
     ),
@@ -220,7 +187,6 @@ var searches = listOf(
         bio = "Exploring the world.",
         email = "alice@example.com",
         image = "avatar.png",
-        posts = 10,
         followers = 200,
         following = 150
     )

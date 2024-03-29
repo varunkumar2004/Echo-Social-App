@@ -1,5 +1,7 @@
 package com.varunkumar.echo_social_app.view.screens
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,8 +9,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material3.Icon
@@ -25,10 +27,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.varunkumar.echo_social_app.data.models.User
 import com.varunkumar.echo_social_app.utils.Result
@@ -41,6 +43,7 @@ fun RegisterScreen(
     modifier: Modifier
 ) {
     // TODO add horizontally animation
+    val context = LocalContext.current
     val result by profileViewModel.authResult.observeAsState()
     val newModifier = Modifier.fillMaxWidth()
     var email by remember { mutableStateOf("") }
@@ -60,7 +63,7 @@ fun RegisterScreen(
     ) {
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(5.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
@@ -75,62 +78,70 @@ fun RegisterScreen(
                 )
 
                 if (register) {
-                    ProfileImage(
-                        modifier = Modifier.align(Alignment.CenterEnd),
-                        size = 80.dp
-                    )
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .clickable {
+                                Toast
+                                    .makeText(context, "Image Clicked", Toast.LENGTH_SHORT)
+                                    .show()
+                            }) {
+                        ProfileImage(
+                            isProfile = false,
+                            modifier = Modifier.align(Alignment.Center),
+                            size = 80.dp
+                        )
+
+                        Icon(
+                            modifier = Modifier.align(Alignment.Center),
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null
+                        )
+                    }
+
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
             }
 
-            OutlinedTextField(
+            RoundTextField(
                 modifier = newModifier,
-                label = { Text("email") },
-                value = email,
-                onValueChange = {
-                    email = it
-                }
-            )
-
-            if (register) {
-                OutlinedTextField(
-                    modifier = newModifier,
-                    label = { Text("name") },
-                    value = name,
-                    onValueChange = {
-                        name = it
-                    }
-                )
-
-                OutlinedTextField(
-                    modifier = newModifier,
-                    label = { Text("bio") },
-                    value = bio,
-                    onValueChange = {
-                        bio = it
-                    }
-                )
+                singleLine = true,
+                header = "email"
+            ) {
+                email = it
             }
 
-            OutlinedTextField(
-                modifier = newModifier,
-                label = { Text("Password") },
-                value = password,
-                onValueChange = {
-                    password = it
-                },
-                visualTransformation = if (!passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
-                trailingIcon = {
-                    val image =
-                        if (!passwordVisible) Icons.Default.RemoveRedEye else Icons.Default.Password
-                    val description = if (passwordVisible) "Hide password" else "Show password"
-
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(imageVector = image, contentDescription = description)
-                    }
+            if (register) {
+                RoundTextField(
+                    modifier = newModifier,
+                    header = "name",
+                    singleLine = true
+                ) {
+                    name = it
                 }
-            )
+
+                RoundTextField(
+                    modifier = newModifier,
+                    header = "bio",
+                    singleLine = true
+                ) {
+                    bio = it
+                }
+            }
+
+            RoundTextField(
+                trailingIcon =
+                if (!passwordVisible) Icons.Default.RemoveRedEye else Icons.Default.Password,
+                visualTransformation =
+                if (!passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
+                header = "password",
+                onClickTrailingIcon = {
+                    passwordVisible = !passwordVisible
+                }
+            ) {
+                password = it
+            }
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -153,11 +164,7 @@ fun RegisterScreen(
                         is Result.Success -> {
                             signInDone()
                         }
-
-                        is Result.Error -> {
-
-                        }
-
+                        is Result.Error -> {}
                         else -> {}
                     }
                 }) {
@@ -169,152 +176,7 @@ fun RegisterScreen(
     }
 }
 
-@Composable
-fun RoundedTextField(
-    modifier: Modifier = Modifier,
-    cornerSize: Dp = 40.dp,
-    placeholder: String? = null
-) {
-    var text by remember {
-        mutableStateOf("")
-    }
-
-    val radius = RoundedCornerShape(cornerSize)
-
-    OutlinedTextField(
-        modifier = modifier,
-        value = text,
-        onValueChange = {
-            text = it
-//            returnText()
-        },
-        placeholder = { placeholder?.let { Text(placeholder) } }
-    )
-}
-
-//@Composable
-//fun RegisterLogin(
-//    isForRegister: Boolean = true, // true for register, false for log in
-//    profileViewModel: ProfileViewModel,
-//    backToButtons: () -> Unit,
-//    signInDone: () -> Unit
-//) {
-//    var email by remember { mutableStateOf("") }
-//    var name by remember { mutableStateOf("") }
-//    var password by remember { mutableStateOf("") }
-//    var bio by remember { mutableStateOf("") }
-//
-//    var passwordVisible by remember { mutableStateOf(true) }
-//    val modifier = Modifier.fillMaxWidth()
-//
-//    var register by remember {
-//        mutableStateOf(true)
-//    }
-//
-//    Column(
-//        verticalArrangement = Arrangement.spacedBy(5.dp),
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ) {
-//        Box(
-//            modifier = modifier,
-//            contentAlignment = Alignment.CenterStart
-//        ) {
-//            IconButton(
-//                onClick = {
-//                    register = !register
-//                }
-//            ) {
-//                Text(
-//                    text =
-//                    if (register) "Register?"
-//                    else "Login?"
-//                )
-//            }
-//
-//            if (register) {
-//                ProfileImage(
-//                    modifier = Modifier.align(Alignment.CenterEnd),
-//                    size = 80.dp
-//                )
-//            }
-//
-//            Spacer(modifier = Modifier.height(10.dp))
-//        }
-//
-//        OutlinedTextField(
-//            modifier = modifier,
-//            label = { Text("email") },
-//            value = email,
-//            onValueChange = {
-//                email = it
-//            }
-//        )
-//
-//        if (register) {
-//            OutlinedTextField(
-//                modifier = modifier,
-//                label = { Text("name") },
-//                value = name,
-//                onValueChange = {
-//                    name = it
-//                }
-//            )
-//
-//            OutlinedTextField(
-//                modifier = modifier,
-//                label = { Text("bio") },
-//                value = bio,
-//                onValueChange = {
-//                    bio = it
-//                }
-//            )
-//        }
-//
-//        OutlinedTextField(
-//            modifier = modifier,
-//            label = { Text("Password") },
-//            value = password,
-//            onValueChange = {
-//                password = it
-//            },
-//            visualTransformation = if (!passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
-//            trailingIcon = {
-//                val image =
-//                    if (passwordVisible) Icons.Default.RemoveRedEye else Icons.Default.Password
-//                val description = if (passwordVisible) "Hide password" else "Show password"
-//
-//                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-//                    Icon(imageVector = image, contentDescription = description)
-//                }
-//            }
-//        )
-//
-//        Spacer(modifier = Modifier.height(10.dp))
-//
-//        OutlinedButton(
-//            modifier = modifier
-//                .height(TextFieldDefaults.MinHeight),
-//            onClick = {
-//                if (!register) {
-//                    profileViewModel.loginUser(email, password)
-//                } else {
-//                    val user = User(
-//                        email = email,
-//                        bio = bio,
-//                        name = name
-//                    )
-//                    profileViewModel.registerUser(user, password)
-//                }
-//            }) {
-//            Text(
-//                text = if (register) "Register" else "Login"
-//            )
-//        }
-//    }
-//}
-
 @Preview(showBackground = true)
 @Composable
 fun RegisterPreview() {
-//    RegisterLogin(true, {})
 }

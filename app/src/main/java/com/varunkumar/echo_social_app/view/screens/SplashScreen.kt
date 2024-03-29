@@ -3,8 +3,10 @@ package com.varunkumar.echo_social_app.view.screens
 import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -14,9 +16,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
+import com.example.trelloclone.R
 import kotlinx.coroutines.delay
 
 @Composable
@@ -48,15 +50,23 @@ fun SplashScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "ECHO", fontFamily = FontFamily.Monospace, fontSize = 40.sp)
-        Text(text = "made by Varun")
+        Image(
+            painter = painterResource(id = R.drawable.echo_icon),
+            contentDescription = null
+        )
+
+        Text(text = "Made by Varun")
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun SplashPreview() {
-    SplashScreen {
-
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(id = R.drawable.echo_icon),
+            contentDescription = null,
+            modifier = Modifier.align(Alignment.Center)
+        )
     }
 }

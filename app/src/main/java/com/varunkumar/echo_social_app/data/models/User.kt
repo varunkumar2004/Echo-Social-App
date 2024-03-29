@@ -5,7 +5,6 @@ data class User(
     val bio: String? = null,
     val email: String = "",
     val image: String? = null,
-    val posts: Int = 0,
     val timestamp: String? = null,
     val followers: Int = 0,
     val following: Int = 0,

@@ -16,7 +16,6 @@ import com.varunkumar.echo_social_app.view.HomeViewModel
 import com.varunkumar.echo_social_app.view.PostViewModel
 import com.varunkumar.echo_social_app.view.ProfileViewModel
 import com.varunkumar.echo_social_app.view.SearchViewModel
-import com.varunkumar.echo_social_app.view.screens.AddPostScreen
 import com.varunkumar.echo_social_app.view.screens.HomeScreen
 import com.varunkumar.echo_social_app.view.screens.PostScreen
 import com.varunkumar.echo_social_app.view.screens.ProfileScreen
@@ -84,16 +83,9 @@ fun Navigation(
             )
         }
 
-
         composable(route = Routes.search_screen.route) {
             SearchScreen(searchViewModel = searchViewModel) {
                 navController.navigateUp()
-            }
-        }
-
-        composable(route = Routes.add_post_screen.route) {
-            AddPostScreen(postViewModel = postViewModel) {
-                navController.navigate(Routes.home_screen.route)
             }
         }
 
@@ -107,6 +99,7 @@ fun Navigation(
         ) {
             ProfileScreen(
                 navController = navController,
+                postViewModel = postViewModel,
                 profileViewModel = profileViewModel,
                 email = it.arguments?.getString("email") ?: "-1",
                 loggingOut = {

@@ -1,7 +1,6 @@
 package com.varunkumar.echo_social_app.view.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,8 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BookmarkAdded
+import androidx.compose.material.icons.filled.BookmarkAdd
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.AlertDialog
@@ -32,7 +31,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,7 +45,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -76,40 +73,25 @@ fun PostScreen(
     // new scaffold
     Scaffold(modifier = modifier, topBar = {
         Box(contentAlignment = Alignment.CenterStart) {
-            IconButton(onClick = {
-                backToHome()
-            }) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back to Home")
-            }
-
-            Text(
-                text = "Echo", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
+            ActionBar(
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = Icons.Default.ArrowBack,
+                header = "Echo",
+                onClickLeadingIcon = { backToHome() }
             )
         }
     }, floatingActionButton = {
         val buttonModifier = Modifier
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.primaryContainer)
-            .border(1.dp, Color.LightGray, CircleShape)
 
         Column {
             IconButton(
                 onClick = {
-                    // TODO add comment functionality
                     showCommentDialog = true
                 }, modifier = buttonModifier
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = null)
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            IconButton(
-                onClick = {
-                    // TODO bookmark functionality
-                }, modifier = buttonModifier
-            ) {
-                Icon(imageVector = Icons.Default.BookmarkAdded, contentDescription = null)
             }
         }
     }) {
@@ -124,7 +106,8 @@ fun PostScreen(
                 ActualPost(
                     modifier = Modifier.padding(horizontal = 15.dp),
                     post = post,
-                    navController = navController
+                    navController = navController,
+                    isCurrUser = false
                 )
             }
 
@@ -140,16 +123,22 @@ fun PostScreen(
             }
 
             AlertDialog(
-                onDismissRequest = { showCommentDialog = false }, modifier = modifier.padding(20.dp)
+                onDismissRequest = { showCommentDialog = false },
+                modifier = modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.White)
             ) {
                 Column(
                     modifier = modifier
                         .padding(20.dp)
-                        .background(Color.White)
+
                 ) {
-                    OutlinedTextField(value = newComment, onValueChange = {
-                        newComment = it
-                    }, label = { Text("New comment") })
+                    RoundTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        header ="Comment"
+                    ) {comment ->
+                        newComment = comment
+                    }
 
                     Spacer(modifier = Modifier.height(10.dp))
 
@@ -182,7 +171,11 @@ fun PostScreen(
 
 @Composable
 fun ActualPost(
-    modifier: Modifier, post: Post, navController: NavController
+    isCurrUser: Boolean = true,
+    modifier: Modifier,
+    post: Post,
+    navController: NavController,
+    onDeletePost: (String) -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
     val whitesmoke = Color(0xFFF5F5F5)
@@ -210,7 +203,11 @@ fun ActualPost(
                         size = 40.dp
                     )
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = post.email, style = MaterialTheme.typography.bodyLarge)
+                    Column {
+                        Text(text = post.name, style = MaterialTheme.typography.bodyLarge)
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(text = post.email, style = MaterialTheme.typography.bodySmall)
+                    }
                 }
 
                 IconButton(onClick = {
@@ -226,33 +223,54 @@ fun ActualPost(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Go To Profile")
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Icon(
-                                    imageVector = Icons.Default.Link,
-                                    contentDescription = null
-                                )
-                            }
-                        }, onClick = {
-                            navController.navigate(Routes.profile_screen.route + "/${post.email}")
-                        })
-                        DropdownMenuItem(text = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
                                 Text("Bookmark")
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Icon(
-                                    imageVector = Icons.Default.Bookmark,
+                                    imageVector = Icons.Default.BookmarkAdd,
                                     contentDescription = null
                                 )
                             }
                         }, onClick = {
                             // TODO bookmark this post
+                            // might need postViewModel or profileViewModel
+                        })
+
+                        if (!isCurrUser) {
+                            DropdownMenuItem(text = {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text("Profile")
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Icon(
+                                        imageVector = Icons.Default.Link,
+                                        contentDescription = null
+                                    )
+                                }
+                            }, onClick = {
+                                navController.navigate(Routes.profile_screen.route + "/${post.email}")
+                            })
+                        } else {
+                            DropdownMenuItem(text = {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text("Delete")
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Icon(
+                                        imageVector = Icons.Default.DeleteForever,
+                                        contentDescription = null
+                                    )
+                                }
+                            }, onClick = {
+                                // TODO delete this post
+                                onDeletePost(post.timestamp)
+                            })
                         }
-                        )
                     }
                 }
 
@@ -267,7 +285,7 @@ fun ActualPost(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .padding(vertical = 10.dp)
+                        .padding(top = 10.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .background(Color.DarkGray),
                     contentAlignment = Alignment.Center
@@ -276,6 +294,7 @@ fun ActualPost(
                 }
             }
 
+            Spacer(modifier = Modifier.height(10.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -319,14 +338,14 @@ fun CommentPreview(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = comment.email, style = MaterialTheme.typography.bodyLarge)
+            Text(text = comment.name, style = MaterialTheme.typography.bodyLarge)
             Spacer(modifier = Modifier.width(10.dp))
             val extractTime = extractTimestamp(comment.timestamp)
             Text(text = extractTime ?: "", fontStyle = FontStyle.Italic)
         }
 
         Spacer(modifier = Modifier.height(5.dp))
-        Text(text = comment.comment, style = MaterialTheme.typography.bodyLarge)
+        Text(text = comment.comment, style = MaterialTheme.typography.bodyMedium)
     }
 
     Divider()

@@ -1,6 +1,7 @@
 package com.varunkumar.echo_social_app.view
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
@@ -38,6 +39,13 @@ class PostViewModel : ViewModel() {
     fun getPost(timestamp: String) {
         viewModelScope.launch {
             _post.value = postRepository.getPost(timestamp)
+        }
+    }
+
+    fun deletePost(email:String, timestamp: String) {
+        Log.d("delete post", "$email _ $timestamp")
+        viewModelScope.launch {
+            postRepository.deletePost(email, timestamp)
         }
     }
 

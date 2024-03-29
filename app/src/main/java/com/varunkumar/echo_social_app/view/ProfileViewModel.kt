@@ -13,9 +13,6 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 class ProfileViewModel : ViewModel() {
-//    private val userRepository: UserRepository =
-//        UserRepository(FirebaseAuth.getInstance(), Injection.instance())
-
     private val profileRepository =
         ProfileRepository(FirebaseAuth.getInstance(), Injection.instance())
 
@@ -64,7 +61,7 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
-    fun getPosts(email: String) {
+    private fun getPosts(email: String) {
         viewModelScope.launch {
             val posts = profileRepository.getUserPosts(email)
             _currProfileState.value = _currProfileState.value.copy(

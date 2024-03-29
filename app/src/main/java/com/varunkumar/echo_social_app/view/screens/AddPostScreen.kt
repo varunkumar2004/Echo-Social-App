@@ -21,10 +21,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.PostAdd
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,7 +44,7 @@ import com.varunkumar.echo_social_app.view.PostViewModel
 @Composable
 fun AddPostScreen(
     postViewModel: PostViewModel,
-    onPostDone: () -> Unit
+    onClickDone: () -> Unit
 ) {
     var caption by remember {
         mutableStateOf("")
@@ -56,7 +55,7 @@ fun AddPostScreen(
     }
 
     var selectedImage by remember {
-        mutableStateOf<Uri?>(Uri.EMPTY)
+        mutableStateOf<Uri?>(null)
     }
 
     val context = LocalContext.current
@@ -65,7 +64,7 @@ fun AddPostScreen(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
             selectedImage = uri
-            selected = true
+            selectedImage?.let { selected = true }
         }
     )
 
@@ -82,55 +81,42 @@ fun AddPostScreen(
 
     Column(
         modifier = modifier.padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Text(
-            text = "New Post",
-            modifier = modifier,
-            textAlign = TextAlign.Center
-        )
-
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedTextField(
+            RoundTextField(
                 modifier = modifier,
-                value = caption,
-                onValueChange = {
-                    caption = it
-                },
-                label = { Text("caption...") },
-                trailingIcon = {
-                    IconButton(
-                        onClick = {
-                            if (caption.isNotBlank() || caption.isNotEmpty()) {
-                                postViewModel.post(
-                                    caption = caption,
-                                    uri = selectedImage
-                                )
-                                onPostDone()
-                            } else {
-                                Toast.makeText(context, "Please Enter Caption", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    ) {
-                        Icon(imageVector = Icons.Default.PostAdd, contentDescription = "Post")
+                header = "Caption",
+                trailingIcon = Icons.Default.Send,
+                onClickTrailingIcon = {
+                    if (caption.isNotBlank() || caption.isNotEmpty()) {
+                        postViewModel.post(
+                            caption = caption,
+                            uri = selectedImage
+                        )
+                        onClickDone()
+                    } else {
+                        Toast.makeText(context, "Please Enter Caption", Toast.LENGTH_SHORT).show()
                     }
                 }
-            )
+            ) {
+                caption = it
+            }
         }
 
         Box(
             modifier = modifier
                 .aspectRatio(1f)
-                .clip(RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(40.dp))
                 .background(Color.LightGray)
         ) {
             if (!selected) {
                 Box(
                     modifier = modifier
                         .padding(10.dp)
-                        .clip(RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(40.dp))
                         .background(Color.DarkGray)
                         .clickable {
                             selectedPhoto()
@@ -158,7 +144,7 @@ fun AddPostScreen(
                     onClick = {
                         // TODO add animations for closing the image
                         selected = false
-                        selectedImage = Uri.EMPTY
+                        selectedImage = null
                     }
                 ) {
                     Icon(

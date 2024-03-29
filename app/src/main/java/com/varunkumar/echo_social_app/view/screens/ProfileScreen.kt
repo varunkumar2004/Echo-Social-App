@@ -1,8 +1,6 @@
 package com.varunkumar.echo_social_app.view.screens
 
 import android.util.Log
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.EditNote
@@ -27,14 +25,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -42,11 +38,13 @@ import com.varunkumar.echo_social_app.data.models.Post
 import com.varunkumar.echo_social_app.data.models.User
 import com.varunkumar.echo_social_app.utils.Routes
 import com.varunkumar.echo_social_app.utils.extractTimestamp
+import com.varunkumar.echo_social_app.view.PostViewModel
 import com.varunkumar.echo_social_app.view.ProfileViewModel
 
 @Composable
 fun ProfileScreen(
     navController: NavController,
+    postViewModel: PostViewModel,
     profileViewModel: ProfileViewModel,
     email: String,
     backButton: () -> Unit,
@@ -54,43 +52,20 @@ fun ProfileScreen(
 ) {
     // TODO restrict profile screen to edit only by correct user
     val currState by profileViewModel.currProfileState
-    Log.d("curr user", currState.user.toString())
-
-    val buttonModifier = Modifier
-        .clip(CircleShape)
-        .background(MaterialTheme.colorScheme.primaryContainer)
-        .border(1.dp, Color.LightGray, CircleShape)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            Box(contentAlignment = Alignment.CenterStart) {
-                IconButton(
-                    modifier = Modifier.align(Alignment.CenterStart),
-                    onClick = {
-                        backButton()
-                    }
-                ) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back to Home")
+            ActionBar(
+                leadingIcon = Icons.Default.ArrowBack,
+                header = "Profile",
+                trailingIcon = Icons.Default.Logout,
+                onClickLeadingIcon = { backButton() },
+                onClickTrailingIcon = {
+                    profileViewModel.logoutUser()
+                    loggingOut()
                 }
-
-                Text(
-                    text = "Profile",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-
-                IconButton(
-                    modifier = Modifier.align(Alignment.CenterEnd)
-                        .padding(end = 10.dp),
-                    onClick = {
-                        profileViewModel.logoutUser()
-                        loggingOut()
-                    }
-                ) {
-                    Icon(imageVector = Icons.Default.Logout, contentDescription = "Logout")
-                }
-            }
+            )
         },
     ) {
         Box(
@@ -112,14 +87,22 @@ fun ProfileScreen(
                     postCount = state.postCount
                 )
             } else {
+                // user currently logged in app session
                 profileViewModel.getCurrentUser()
-                Log.d("posts", currState.posts.toString())
                 ProfileSection(
                     navController = navController,
                     modifier = modifier,
                     user = currState.user,
                     posts = currState.posts,
-                    postCount = currState.postCount
+                    postCount = currState.postCount,
+                    isCurrUser = true,
+                    onDeletePost = { timestamp ->
+                        Log.d("timestamp", timestamp)
+                        currState.user?.let { user ->
+                            postViewModel.deletePost(user.email, timestamp = timestamp)
+                            profileViewModel.getCurrentUser()
+                        }
+                    }
                 )
             }
         }
@@ -132,7 +115,9 @@ fun ProfileSection(
     modifier: Modifier,
     user: User?,
     posts: List<Post>,
-    postCount: Int
+    postCount: Int,
+    isCurrUser: Boolean = false,
+    onDeletePost: (String) -> Unit = {}
 ) {
     Column {
         Column(
@@ -151,7 +136,7 @@ fun ProfileSection(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     // TODO change email to name
-                    Text(text = (user?.email) ?: "", style = MaterialTheme.typography.bodyLarge)
+                    Text(text = (user?.name) ?: "", style = MaterialTheme.typography.bodyLarge)
                 }
 
                 IconButton(onClick = {
@@ -197,7 +182,13 @@ fun ProfileSection(
             }
         }
 
-        PostsSection(navController = navController, posts = posts)
+        PostsSection(
+            navController = navController,
+            posts = posts,
+            isCurrUser = isCurrUser,
+            onDeletePost = {
+                onDeletePost(it)
+            })
     }
 }
 
@@ -212,10 +203,16 @@ fun CounterRow(label: String, value: Int) {
 @Composable
 fun PostsSection(
     navController: NavController,
-    posts: List<Post>
+    posts: List<Post>,
+    isCurrUser: Boolean,
+    onDeletePost: (String) -> Unit
 ) {
+    val listState = rememberLazyListState()
+
     LazyColumn(
-        modifier = Modifier.fillMaxWidth()
+        state = listState,
+        modifier = Modifier.fillMaxWidth(),
+        reverseLayout = true
     ) {
         items(posts) { post ->
             ActualPost(
@@ -226,24 +223,23 @@ fun PostsSection(
                     .clickable {
                         navController.navigate(Routes.post_screen.route + "/${post.timestamp}")
                     },
-                navController = navController
+                navController = navController,
+                isCurrUser = isCurrUser,
+                onDeletePost = {
+                    onDeletePost(post.timestamp)
+                }
             )
         }
+    }
+
+    LaunchedEffect(posts.size) {
+        listState.animateScrollToItem(posts.size - 1)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun ProfilePreview() {
-    val user = User(
-        name = "John Doe",
-        bio = "A passionate developer",
-        email = "john@example.com",
-        image = "profile.jpg",
-        posts = 10,
-        followers = 100,
-        following = 50,
-        nationality = "India"
-    )
+
 }
 

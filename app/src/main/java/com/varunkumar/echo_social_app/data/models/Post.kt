@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Post(
+    val name:String = "",
     val email: String = "",
     val image: String? = null,
     val caption: String = "",
