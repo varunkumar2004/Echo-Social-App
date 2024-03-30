@@ -1,6 +1,7 @@
 package com.varunkumar.echo_social_app.view.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +24,6 @@ import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,6 +45,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -76,7 +78,7 @@ fun PostScreen(
             ActionBar(
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = Icons.Default.ArrowBack,
-                header = "Echo",
+                header = "Post",
                 onClickLeadingIcon = { backToHome() }
             )
         }
@@ -113,7 +115,7 @@ fun PostScreen(
 
             // TODO comment section
             CommentSection(
-                modifier = modifier.padding(10.dp), comments = comments
+                modifier = modifier.fillMaxWidth().padding(10.dp), comments = comments
             )
         }
 
@@ -135,8 +137,8 @@ fun PostScreen(
                 ) {
                     RoundTextField(
                         modifier = Modifier.fillMaxWidth(),
-                        header ="Comment"
-                    ) {comment ->
+                        header = "Comment"
+                    ) { comment ->
                         newComment = comment
                     }
 
@@ -182,7 +184,7 @@ fun ActualPost(
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(20.dp))
             .background(whitesmoke)
     ) {
         Column(
@@ -203,11 +205,11 @@ fun ActualPost(
                         size = 40.dp
                     )
                     Spacer(modifier = Modifier.width(10.dp))
-                    Column {
-                        Text(text = post.name, style = MaterialTheme.typography.bodyLarge)
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(text = post.email, style = MaterialTheme.typography.bodySmall)
-                    }
+                    Text(
+                        text = post.name,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
                 IconButton(onClick = {
@@ -276,7 +278,7 @@ fun ActualPost(
 
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(5.dp))
             Text(text = post.caption, style = MaterialTheme.typography.bodyLarge)
 
             post.image?.let {
@@ -314,14 +316,19 @@ fun ActualPost(
 fun CommentSection(
     modifier: Modifier, comments: List<Comment>?
 ) {
-    LazyColumn {
-        comments?.let {
+    if (!comments.isNullOrEmpty()) {
+        Spacer(modifier = Modifier.height(5.dp))
+        LazyColumn {
             items(comments) {
                 CommentPreview(
-                    comment = it, modifier = modifier.padding(vertical = 5.dp, horizontal = 10.dp)
+                    comment = it,
+                    modifier = Modifier.padding(vertical = 2.dp, horizontal = 10.dp)
                 )
             }
         }
+    }
+    else {
+        Text(text = "No comments.", modifier = modifier, textAlign = TextAlign.Center)
     }
 }
 
@@ -329,30 +336,49 @@ fun CommentSection(
 fun CommentPreview(
     comment: Comment, modifier: Modifier
 ) {
-    Column(
+    val radius =RoundedCornerShape(40.dp)
+    Box(
         modifier = modifier
+            .clip(radius)
+            .border(1.dp, Color.LightGray, radius)
     ) {
-        // post header
-        // TODO change email to name
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier
+                .padding(vertical = 10.dp, horizontal = 20.dp)
         ) {
-            Text(text = comment.name, style = MaterialTheme.typography.bodyLarge)
-            Spacer(modifier = Modifier.width(10.dp))
-            val extractTime = extractTimestamp(comment.timestamp)
-            Text(text = extractTime ?: "", fontStyle = FontStyle.Italic)
+            // post header
+            // TODO change email to name
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = comment.name, style = MaterialTheme.typography.bodyLarge)
+                val extractTime = extractTimestamp(comment.timestamp)
+                Text(text = extractTime ?: "", fontStyle = FontStyle.Italic)
+            }
+
+            Spacer(modifier = Modifier.height(5.dp))
+            Text(text = comment.comment, style = MaterialTheme.typography.bodyMedium)
         }
-
-        Spacer(modifier = Modifier.height(5.dp))
-        Text(text = comment.comment, style = MaterialTheme.typography.bodyMedium)
     }
-
-    Divider()
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun PostPreview() {
-////    ActualPost(modifier = Modifier, post = Post(), navController = rememberNavController())
-//}
+@Preview(showBackground = true)
+@Composable
+fun PostPreview() {
+    val comment = Comment(
+        comment = "This is a great article!",
+        name = "John Doe",
+        user = "johndoe@example.com",
+        timestamp = "20240328_220116",
+        email = "johndoe@example.com"
+    )
+
+    CommentPreview(
+        comment = comment,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 0.dp, horizontal = 10.dp)
+    )
+}

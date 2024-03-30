@@ -57,12 +57,6 @@ class PostViewModel : ViewModel() {
         getAllComments(post)
     }
 
-//    fun postImage(uri: Uri) {
-//        viewModelScope.launch {
-//            postRepository.postImage(uri)
-//        }
-//    }
-
     fun getAllComments(post: Post) {
         viewModelScope.launch {
             _comments.value = postRepository.getAllComments(post)

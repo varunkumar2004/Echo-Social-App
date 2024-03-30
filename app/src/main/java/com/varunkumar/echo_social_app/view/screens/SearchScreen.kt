@@ -166,7 +166,8 @@ fun SearchItem(
             if (buffered) {
                 Icon(
                     imageVector = Icons.Default.Clear,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = Color.DarkGray
                 )
             }
         }

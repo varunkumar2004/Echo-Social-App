@@ -1,6 +1,5 @@
 package com.varunkumar.echo_social_app.view.screens
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -97,7 +96,6 @@ fun ProfileScreen(
                     postCount = currState.postCount,
                     isCurrUser = true,
                     onDeletePost = { timestamp ->
-                        Log.d("timestamp", timestamp)
                         currState.user?.let { user ->
                             postViewModel.deletePost(user.email, timestamp = timestamp)
                             profileViewModel.getCurrentUser()
@@ -136,7 +134,13 @@ fun ProfileSection(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     // TODO change email to name
-                    Text(text = (user?.name) ?: "", style = MaterialTheme.typography.bodyLarge)
+                    Column {
+                        user?.let {
+                            Text(text = user.name, style = MaterialTheme.typography.bodyLarge)
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(text = user.email, style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
                 }
 
                 IconButton(onClick = {
@@ -233,7 +237,9 @@ fun PostsSection(
     }
 
     LaunchedEffect(posts.size) {
-        listState.animateScrollToItem(posts.size - 1)
+        if (posts.isNotEmpty()) {
+            listState.animateScrollToItem(posts.size - 1)
+        }
     }
 }
 

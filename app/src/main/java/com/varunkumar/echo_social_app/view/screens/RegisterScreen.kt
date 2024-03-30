@@ -164,7 +164,9 @@ fun RegisterScreen(
                         is Result.Success -> {
                             signInDone()
                         }
-                        is Result.Error -> {}
+                        is Result.Error -> {
+                            Toast.makeText(context, "${(result as Result.Error).exception.message}", Toast.LENGTH_SHORT).show()
+                        }
                         else -> {}
                     }
                 }) {

@@ -1,5 +1,6 @@
 package com.varunkumar.echo_social_app.view
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
