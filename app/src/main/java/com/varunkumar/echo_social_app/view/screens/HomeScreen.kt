@@ -22,7 +22,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,6 +41,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import com.varunkumar.echo_social_app.ui.theme.whitesmoke
 import com.varunkumar.echo_social_app.utils.NavItem
 import com.varunkumar.echo_social_app.utils.Routes
 import com.varunkumar.echo_social_app.view.HomeViewModel
@@ -65,7 +69,9 @@ fun HomeScreen(
         bottomBar = { BottomBar(navController = navController, postViewModel = postViewModel) },
         topBar = {
             ActionBar(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 5.dp),
                 header = "Echo"
             )
         },
@@ -93,7 +99,9 @@ fun HomeScreen(
             }
 
             LaunchedEffect(posts.size) {
-                listState.animateScrollToItem(posts.size - 1)
+                if (posts.isNotEmpty()) {
+                    listState.animateScrollToItem(posts.size - 1)
+                }
             }
 
             PullRefreshIndicator(
@@ -139,53 +147,80 @@ fun BottomBar(
     }
 
     NavigationBar(
+        containerColor = whitesmoke,
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp),
+            .height(TextFieldDefaults.MinHeight + 10.dp),
     ) {
-        NavigationBarItem(selected = NavItem.Home.route == selected, onClick = {
-            selected = NavItem.Home.route
-        }, alwaysShowLabel = false, icon = {
-            Icon(
-                imageVector = NavItem.Home.icon, contentDescription = NavItem.Home.dest
-            )
-        })
+        NavigationBarItem(
+            colors = NavigationBarItemDefaults.colors(
+                indicatorColor = Color.LightGray
+            ),
+            selected = NavItem.Home.route == selected,
+            onClick = {
+                selected = NavItem.Home.route
+            },
+            alwaysShowLabel = false,
+            icon = {
+                Icon(
+                    imageVector = NavItem.Home.icon, contentDescription = NavItem.Home.dest
+                )
+            },
+        )
 
-        NavigationBarItem(selected = NavItem.AddPost.route == selected, onClick = {
-            showBottomSheet = true
-        }, alwaysShowLabel = false, icon = {
-            Icon(
-                imageVector = NavItem.AddPost.icon, contentDescription = NavItem.AddPost.dest
-            )
-        })
+        NavigationBarItem(
+            colors = NavigationBarItemDefaults.colors(
+                indicatorColor = Color.LightGray
+            ),
+            selected = NavItem.AddPost.route == selected,
+            onClick = {
+                showBottomSheet = true
+            }, alwaysShowLabel = false, icon = {
+                Icon(
+                    imageVector = NavItem.AddPost.icon, contentDescription = NavItem.AddPost.dest
+                )
+            }
+        )
 
 
-        NavigationBarItem(selected = NavItem.Search.route == selected, onClick = {
-            selected = NavItem.Search.route
-            navController.navigate(NavItem.Search.dest)
-        }, alwaysShowLabel = false, icon = {
-            Icon(
-                imageVector = NavItem.Search.icon, contentDescription = NavItem.Search.dest
-            )
-        })
+        NavigationBarItem(
+            colors = NavigationBarItemDefaults.colors(
+                indicatorColor = Color.LightGray
+            ),
+            selected = NavItem.Search.route == selected,
+            onClick = {
+                selected = NavItem.Search.route
+                navController.navigate(NavItem.Search.dest)
+            }, alwaysShowLabel = false, icon = {
+                Icon(
+                    imageVector = NavItem.Search.icon, contentDescription = NavItem.Search.dest
+                )
+            }
+        )
 
-        NavigationBarItem(selected = NavItem.Profile.route == selected, onClick = {
-            selected = NavItem.Profile.route
-            navController.navigate(NavItem.Profile.dest + "/1")
-        }, alwaysShowLabel = false, icon = {
-            Icon(
-                imageVector = NavItem.Profile.icon, contentDescription = NavItem.Profile.dest
-            )
-        })
+        NavigationBarItem(
+            colors = NavigationBarItemDefaults.colors(
+                indicatorColor = Color.LightGray
+            ),
+            selected = NavItem.Profile.route == selected,
+            onClick = {
+                selected = NavItem.Profile.route
+                navController.navigate(NavItem.Profile.dest + "/1")
+            }, alwaysShowLabel = false, icon = {
+                Icon(
+                    imageVector = NavItem.Profile.icon, contentDescription = NavItem.Profile.dest
+                )
+            }
+        )
     }
 }
-
 
 @Composable
 fun ProfileImage(
     modifier: Modifier = Modifier,
     isProfile: Boolean = true,
-    size: Dp
+    size: Dp,
+    uri: Any? = null
 ) {
     Box(
         modifier = modifier
@@ -193,14 +228,20 @@ fun ProfileImage(
             .clip(CircleShape)
             .background(Color.LightGray)
     ) {
-        if (isProfile) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = null,
-                modifier = Modifier.align(
-                    Alignment.Center
+        if (uri == null) {
+            if (isProfile) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(
+                            Alignment.Center
+                        )
                 )
-            )
+            }
+        } else {
+            AsyncImage(model = uri, contentDescription = null)
         }
     }
 }

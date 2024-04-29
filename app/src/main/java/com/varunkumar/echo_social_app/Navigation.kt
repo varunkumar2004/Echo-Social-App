@@ -11,6 +11,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.google.firebase.auth.FirebaseAuth
 import com.varunkumar.echo_social_app.utils.Routes
 import com.varunkumar.echo_social_app.view.HomeViewModel
 import com.varunkumar.echo_social_app.view.PostViewModel
@@ -22,7 +23,6 @@ import com.varunkumar.echo_social_app.view.screens.ProfileScreen
 import com.varunkumar.echo_social_app.view.screens.RegisterScreen
 import com.varunkumar.echo_social_app.view.screens.SearchScreen
 import com.varunkumar.echo_social_app.view.screens.SplashScreen
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun Navigation(
@@ -84,7 +84,7 @@ fun Navigation(
         }
 
         composable(route = Routes.search_screen.route) {
-            SearchScreen(searchViewModel = searchViewModel) {
+            SearchScreen(navController = navController, searchViewModel = searchViewModel) {
                 navController.navigateUp()
             }
         }
@@ -104,7 +104,7 @@ fun Navigation(
                 email = it.arguments?.getString("email") ?: "-1",
                 loggingOut = {
                     navController.navigate(Routes.register_screen.route)
-                } ,
+                },
                 backButton = {
                     navController.navigateUp()
                 }

@@ -2,15 +2,17 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
+    kotlin("kapt")
+    id("com.google.dagger.hilt.android")
     kotlin("plugin.serialization") version "1.9.22"
 }
 
 android {
-    namespace = "com.example.trelloclone"
+    namespace = "com.varunkumar.echo_social_app"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.trelloclone"
+        applicationId = "com.varunkumar.echo_social_app"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -55,6 +57,10 @@ dependencies {
     implementation("androidx.compose.runtime:runtime:1.6.4")
     implementation("androidx.compose.runtime:runtime-livedata:1.6.4")
 
+    val lifecycle_version = "2.7.0"
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycle_version")
+
+
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
@@ -81,4 +87,13 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.6.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+
+    // dagger hilt
+    implementation("com.google.dagger:hilt-android:2.44")
+    kapt("com.google.dagger:hilt-android-compiler:2.44")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+}
+
+kapt {
+    correctErrorTypes = true
 }

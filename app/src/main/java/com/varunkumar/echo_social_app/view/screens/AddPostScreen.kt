@@ -18,10 +18,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.outlined.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -35,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -86,24 +87,32 @@ fun AddPostScreen(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            RoundTextField(
-                modifier = modifier,
-                header = "Caption",
-                trailingIcon = Icons.Default.Send,
-                onClickTrailingIcon = {
-                    if (caption.isNotBlank() || caption.isNotEmpty()) {
-                        postViewModel.post(
-                            caption = caption,
-                            uri = selectedImage
-                        )
-                        onClickDone()
-                    } else {
-                        Toast.makeText(context, "Please Enter Caption", Toast.LENGTH_SHORT).show()
+            TextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = caption,
+                onValueChange = {
+                    caption = it
+                },
+                label = { Text(text = "Caption") },
+                trailingIcon = {
+                    IconButton(
+                        onClick = {
+                            if (caption.isNotBlank() || caption.isNotEmpty()) {
+                                postViewModel.post(
+                                    caption = caption,
+                                    uri = selectedImage
+                                )
+                                onClickDone()
+                            } else {
+                                Toast.makeText(context, "Please Enter Caption", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        }
+                    ) {
+                        Icon(imageVector = Icons.Outlined.Send, contentDescription = null)
                     }
                 }
-            ) {
-                caption = it
-            }
+            )
         }
 
         Box(

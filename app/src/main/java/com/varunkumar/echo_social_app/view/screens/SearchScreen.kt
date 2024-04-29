@@ -19,11 +19,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ClearAll
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,20 +34,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.varunkumar.echo_social_app.data.models.User
+import com.varunkumar.echo_social_app.utils.Routes
 import com.varunkumar.echo_social_app.view.SearchViewModel
 
 @Composable
 fun SearchScreen(
+    navController: NavController,
     searchViewModel: SearchViewModel,
     backButton: () -> Unit
 ) {
     val searchText by searchViewModel.searchText.collectAsState()
     val isSearching by searchViewModel.isSearching.collectAsState()
-    val user by searchViewModel.user.collectAsState(null)
+    val users by searchViewModel.users
 
     Scaffold(
         topBar = {
@@ -61,64 +66,32 @@ fun SearchScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
-                .padding(vertical = 10.dp, horizontal = 20.dp)
+                .padding(vertical = 0.dp, horizontal = 20.dp)
         ) {
-            RoundTextField(
-                header = null,
-                singleLine = true,
-                trailingIcon = Icons.Default.Search,
-                onClickTrailingIcon = {
+            TextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = searchText,
+                label = { Text(text = "Search") },
+                onValueChange = searchViewModel::onSearchTextChange,
+                trailingIcon = {
+                    IconButton(onClick = searchViewModel::onToggleSearch) {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                    }
                 }
-            ) { str ->
-                // TODO search
-            }
+            )
 
-            if (isSearching) {
-                Column(
+            users?.let { res ->
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 10.dp)
                         .clip(RoundedCornerShape(10.dp))
                 ) {
-                    if (user != null) {
-                        SearchItem(
-                            user = user!!,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-
+                    items(res) {user ->
+                        SearchItem(user = user, modifier = Modifier.fillMaxWidth()) {
+                            navController.navigate(Routes.profile_screen.route + "/${user.email}")
                         }
-                    } else {
-                        Text(text = "no such user exists", textAlign = TextAlign.Center)
-                    }
-                }
-            }
 
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = "Search History")
-                    IconButton(onClick = {
-                        // TODO clear cache of all stored searches
-                        searches = emptyList()
-                    }) {
-                        Icon(imageVector = Icons.Default.ClearAll, contentDescription = "clear all")
-                    }
-                }
-
-                LazyColumn {
-                    items(searches) {user ->
-                        SearchItem(
-                            user = user,
-                            modifier = Modifier.fillMaxWidth(),
-                            buffered = true
-                        ) {
-
-                        }
                         Spacer(modifier = Modifier.height(5.dp))
                     }
                 }
@@ -149,7 +122,7 @@ fun SearchItem(
     ) {
         Row(
             modifier = modifier
-                .padding(horizontal = 20.dp, vertical = 15.dp),
+                .padding(horizontal = 10.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -162,33 +135,6 @@ fun SearchItem(
                 }
                 Text(text = user.email)
             }
-
-            if (buffered) {
-                Icon(
-                    imageVector = Icons.Default.Clear,
-                    contentDescription = null,
-                    tint = Color.DarkGray
-                )
-            }
         }
     }
 }
-
-var searches = listOf(
-    User(
-        name = "John Doe",
-        bio = "I love coding!",
-        email = "john@example.com",
-        image = "profile.jpg",
-        followers = 100,
-        following = 50
-    ),
-    User(
-        name = "Alice Smith",
-        bio = "Exploring the world.",
-        email = "alice@example.com",
-        image = "avatar.png",
-        followers = 200,
-        following = 150
-    )
-)

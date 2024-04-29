@@ -19,23 +19,24 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.BookmarkAdd
-import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.outlined.BookmarkAdd
+import androidx.compose.material.icons.outlined.DeleteForever
+import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,10 +49,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.varunkumar.echo_social_app.data.models.Comment
 import com.varunkumar.echo_social_app.data.models.Post
+import com.varunkumar.echo_social_app.ui.theme.whitesmoke
 import com.varunkumar.echo_social_app.utils.Routes
 import com.varunkumar.echo_social_app.utils.extractTimestamp
 import com.varunkumar.echo_social_app.view.PostViewModel
@@ -68,9 +71,17 @@ fun PostScreen(
         mutableStateOf(false)
     }
 
-    val post by postViewModel.post.observeAsState()
-    val comments by postViewModel.comments.observeAsState()
+    val post by postViewModel.post
+    val comments by postViewModel.comments
     val modifier = Modifier.fillMaxWidth()
+
+    LifecycleStartEffect {
+        postViewModel.getPost(timestamp)
+
+        onStopOrDispose {
+            postViewModel.clearPost()
+        }
+    }
 
     // new scaffold
     Scaffold(modifier = modifier, topBar = {
@@ -83,25 +94,19 @@ fun PostScreen(
             )
         }
     }, floatingActionButton = {
-        val buttonModifier = Modifier
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primaryContainer)
-
-        Column {
-            IconButton(
-                onClick = {
-                    showCommentDialog = true
-                }, modifier = buttonModifier
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = null)
+        FloatingActionButton(
+            containerColor = whitesmoke,
+            shape = CircleShape,
+            onClick = {
+                showCommentDialog = true
             }
+        ) {
+            Icon(imageVector = Icons.Default.Add, contentDescription = null)
         }
     }) {
         Column(
             modifier = modifier.padding(it)
         ) {
-            postViewModel.getPost(timestamp)
-
             post?.let { post ->
                 postViewModel.getAllComments(post)
 
@@ -115,7 +120,9 @@ fun PostScreen(
 
             // TODO comment section
             CommentSection(
-                modifier = modifier.fillMaxWidth().padding(10.dp), comments = comments
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(10.dp), comments = comments
             )
         }
 
@@ -135,12 +142,12 @@ fun PostScreen(
                         .padding(20.dp)
 
                 ) {
-                    RoundTextField(
+                    TextField(
                         modifier = Modifier.fillMaxWidth(),
-                        header = "Comment"
-                    ) { comment ->
-                        newComment = comment
-                    }
+                        label = { Text(text = "Comment") },
+                        value = newComment,
+                        onValueChange = { newComment = it }
+                    )
 
                     Spacer(modifier = Modifier.height(10.dp))
 
@@ -180,7 +187,6 @@ fun ActualPost(
     onDeletePost: (String) -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val whitesmoke = Color(0xFFF5F5F5)
 
     Box(
         modifier = modifier
@@ -205,11 +211,15 @@ fun ActualPost(
                         size = 40.dp
                     )
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = post.name,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column {
+                        Text(
+                            text = post.name,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+
+                        Text(text = post.email, style = MaterialTheme.typography.bodyMedium)
+                    }
+
                 }
 
                 IconButton(onClick = {
@@ -218,7 +228,12 @@ fun ActualPost(
                 }) {
                     Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = "More Options")
 
-                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    DropdownMenu(
+                        modifier = Modifier
+                            .background(whitesmoke),
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
                         DropdownMenuItem(text = {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -226,9 +241,9 @@ fun ActualPost(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text("Bookmark")
-                                Spacer(modifier = Modifier.width(10.dp))
+                                Spacer(modifier = Modifier.width(20.dp))
                                 Icon(
-                                    imageVector = Icons.Default.BookmarkAdd,
+                                    imageVector = Icons.Outlined.BookmarkAdd,
                                     contentDescription = null
                                 )
                             }
@@ -245,9 +260,9 @@ fun ActualPost(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text("Profile")
-                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Spacer(modifier = Modifier.width(20.dp))
                                     Icon(
-                                        imageVector = Icons.Default.Link,
+                                        imageVector = Icons.Outlined.Link,
                                         contentDescription = null
                                     )
                                 }
@@ -262,9 +277,9 @@ fun ActualPost(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text("Delete")
-                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Spacer(modifier = Modifier.width(20.dp))
                                     Icon(
-                                        imageVector = Icons.Default.DeleteForever,
+                                        imageVector = Icons.Outlined.DeleteForever,
                                         contentDescription = null
                                     )
                                 }
@@ -286,13 +301,14 @@ fun ActualPost(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .padding(top = 10.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color.DarkGray),
-                    contentAlignment = Alignment.Center
+                        .padding(top = 10.dp),
+                    contentAlignment = Alignment.CenterStart
                 ) {
-                    AsyncImage(model = post.image, contentDescription = "Post Image")
+                    AsyncImage(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp)),
+                        model = post.image, contentDescription = "Post Image"
+                    )
                 }
             }
 
@@ -326,8 +342,7 @@ fun CommentSection(
                 )
             }
         }
-    }
-    else {
+    } else {
         Text(text = "No comments.", modifier = modifier, textAlign = TextAlign.Center)
     }
 }
@@ -336,7 +351,7 @@ fun CommentSection(
 fun CommentPreview(
     comment: Comment, modifier: Modifier
 ) {
-    val radius =RoundedCornerShape(40.dp)
+    val radius = RoundedCornerShape(40.dp)
     Box(
         modifier = modifier
             .clip(radius)
@@ -355,7 +370,12 @@ fun CommentPreview(
             ) {
                 Text(text = comment.name, style = MaterialTheme.typography.bodyLarge)
                 val extractTime = extractTimestamp(comment.timestamp)
-                Text(text = extractTime ?: "", fontStyle = FontStyle.Italic)
+                Text(
+                    text = extractTime ?: "",
+                    fontStyle = FontStyle.Italic,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.DarkGray
+                )
             }
 
             Spacer(modifier = Modifier.height(5.dp))

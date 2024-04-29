@@ -16,10 +16,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -28,13 +28,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.varunkumar.echo_social_app.data.models.Post
 import com.varunkumar.echo_social_app.data.models.User
+import com.varunkumar.echo_social_app.ui.theme.whitesmoke
 import com.varunkumar.echo_social_app.utils.Routes
 import com.varunkumar.echo_social_app.utils.extractTimestamp
 import com.varunkumar.echo_social_app.view.PostViewModel
@@ -51,6 +53,7 @@ fun ProfileScreen(
 ) {
     // TODO restrict profile screen to edit only by correct user
     val currState by profileViewModel.currProfileState
+    val trailingIcon = if (email == "1") Icons.Default.Logout else null
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -58,7 +61,7 @@ fun ProfileScreen(
             ActionBar(
                 leadingIcon = Icons.Default.ArrowBack,
                 header = "Profile",
-                trailingIcon = Icons.Default.Logout,
+                trailingIcon = trailingIcon,
                 onClickLeadingIcon = { backButton() },
                 onClickTrailingIcon = {
                     profileViewModel.logoutUser()
@@ -77,17 +80,22 @@ fun ProfileScreen(
 
             if (email != "1") {
                 profileViewModel.getUser(email)
+
                 val state = profileViewModel.profileState.value
                 ProfileSection(
                     navController = navController,
                     modifier = modifier,
                     user = state.user,
                     posts = state.posts,
-                    postCount = state.postCount
+                    postCount = state.postCount,
+                    onFollowClick = {
+                        profileViewModel.followUser(email)
+                    }
                 )
             } else {
                 // user currently logged in app session
                 profileViewModel.getCurrentUser()
+
                 ProfileSection(
                     navController = navController,
                     modifier = modifier,
@@ -115,6 +123,7 @@ fun ProfileSection(
     posts: List<Post>,
     postCount: Int,
     isCurrUser: Boolean = false,
+    onFollowClick: () -> Unit = {},
     onDeletePost: (String) -> Unit = {}
 ) {
     Column {
@@ -130,7 +139,8 @@ fun ProfileSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     ProfileImage(
-                        size = 40.dp
+                        size = 40.dp,
+                        uri = user?.image
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     // TODO change email to name
@@ -143,48 +153,72 @@ fun ProfileSection(
                     }
                 }
 
-                IconButton(onClick = {
-                    // TODO edit profile functionality
-                }) {
-                    Icon(imageVector = Icons.Default.EditNote, contentDescription = "Edit Profile")
+                if (!isCurrUser) {
+                    Button(
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = whitesmoke,
+                            contentColor = Color.Black
+                        ),
+                        onClick = {
+                            onFollowClick()
+                        }
+                    ) {
+                        Text(text = "Follow")
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(10.dp))
 
             if (!user?.bio.isNullOrBlank() || !user?.bio.isNullOrEmpty()) {
-                Text(text = (user?.bio) ?: "", style = MaterialTheme.typography.bodyLarge)
-                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    text = (user?.bio) ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.DarkGray,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(10.dp))
             }
 
-            user?.let {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(15.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // TODO correct counters for each
-                    CounterRow(label = "Posts", value = postCount)
-                    CounterRow(label = "Following", value = user.following)
-                    CounterRow(label = "Followers", value = user.followers)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-            // TODO add timestamp to user object
             val timestamp = user?.timestamp?.let { extractTimestamp(it) }
             val nationality = user?.nationality
 
             Row {
-                Text(text = "Signed On $timestamp", fontStyle = FontStyle.Italic)
+                Text(
+                    text = "Signed On $timestamp",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.DarkGray,
+                )
+
                 if (nationality != null) {
                     Spacer(modifier = Modifier.width(5.dp))
                     Text(text = "·", fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.width(5.dp))
-                    Text(text = user.nationality, fontStyle = FontStyle.Italic)
+                    Text(
+                        text = user.nationality,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.DarkGray
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            user?.let {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // TODO correct counters for each
+                    CounterRow(label = "Posts", value = postCount)
+                    CounterRow(label = "Followers", value = user.followers)
                 }
             }
         }
+
+        Divider()
 
         PostsSection(
             navController = navController,
@@ -192,15 +226,20 @@ fun ProfileSection(
             isCurrUser = isCurrUser,
             onDeletePost = {
                 onDeletePost(it)
-            })
+            }
+        )
     }
 }
 
+
 @Composable
 fun CounterRow(label: String, value: Int) {
-    Row {
-        Text(text = "$label: ")
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(text = value.toString(), fontWeight = FontWeight.Bold)
+        Text(text = label)
     }
 }
 

@@ -1,22 +1,31 @@
 package com.varunkumar.echo_social_app
 
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
-object Injection {
-    private val instance: FirebaseFirestore by lazy {
-        FirebaseFirestore.getInstance()
+object AppModule {
+    fun authInstance(): FirebaseAuth {
+        val result by lazy {
+            FirebaseAuth.getInstance()
+        }
+
+        return result
     }
 
-    fun instance(): FirebaseFirestore {
-        return instance
+    fun firestoreInstance(): FirebaseFirestore {
+        val result by lazy {
+            FirebaseFirestore.getInstance()
+        }
+
+        return result
     }
 
-    private val storage: FirebaseStorage by lazy {
-        FirebaseStorage.getInstance()
-    }
+    fun storageInstance(): FirebaseStorage {
+        val result by lazy {
+            FirebaseStorage.getInstance()
+        }
 
-    fun storage(): FirebaseStorage {
-        return storage
+        return result
     }
 }

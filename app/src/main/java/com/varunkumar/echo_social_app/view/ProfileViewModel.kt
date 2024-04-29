@@ -1,21 +1,24 @@
 package com.varunkumar.echo_social_app.view
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.varunkumar.echo_social_app.Injection
+import com.varunkumar.echo_social_app.AppModule
 import com.varunkumar.echo_social_app.data.ProfileRepository
 import com.varunkumar.echo_social_app.data.models.Post
 import com.varunkumar.echo_social_app.data.models.User
 import com.varunkumar.echo_social_app.utils.Result
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 class ProfileViewModel : ViewModel() {
-    private val profileRepository =
-        ProfileRepository(FirebaseAuth.getInstance(), Injection.instance())
+    private val profileRepository = ProfileRepository(
+        AppModule.authInstance(),
+        AppModule.firestoreInstance(),
+        AppModule.storageInstance()
+    )
 
     private val _authResult = MutableLiveData<Result<Boolean>>()
     val authResult get() = _authResult
@@ -31,9 +34,10 @@ class ProfileViewModel : ViewModel() {
         getCurrentUser()
     }
 
-    fun registerUser(user: User, password: String) {
+    fun registerUser(user: User, password: String, image: Uri?) {
         viewModelScope.launch {
-            _authResult.value = profileRepository.registerUserWithEmail(user, password)
+            _authResult.value = profileRepository.registerUserWithEmail(user, password, image)
+            Log.d("image", "image selected $image")
         }
         loginUser(user.email, password)
     }
@@ -47,13 +51,14 @@ class ProfileViewModel : ViewModel() {
     fun getUser(email: String) {
         viewModelScope.launch {
             _profileState.value = _profileState.value.copy(
-                user = profileRepository.getUser(email),
-                posts = profileRepository.getUserPosts(email)
+                user = profileRepository.getUser(email)
             )
+
+            getUserPosts(email)
         }
     }
 
-    fun getUserPosts(email: String) {
+    private fun getUserPosts(email: String) {
         viewModelScope.launch {
             val posts = profileRepository.getUserPosts(email)
             _profileState.value = _profileState.value.copy(
@@ -84,6 +89,12 @@ class ProfileViewModel : ViewModel() {
     fun logoutUser() {
         _authResult.value = profileRepository.logoutUser()
         _currProfileState.value = ProfileState()
+    }
+
+    fun followUser(email: String) {
+        viewModelScope.launch {
+            profileRepository.followUser(email)
+        }
     }
 }
 

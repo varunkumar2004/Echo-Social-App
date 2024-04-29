@@ -1,24 +1,24 @@
 package com.varunkumar.echo_social_app.view
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.varunkumar.echo_social_app.Injection
+import com.varunkumar.echo_social_app.AppModule
+import com.varunkumar.echo_social_app.data.PostRepository
 import com.varunkumar.echo_social_app.data.UserRepository
 import com.varunkumar.echo_social_app.data.models.Post
-import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel  : ViewModel() {
+    private val userRepository = UserRepository(
+        AppModule.authInstance(),
+        AppModule.firestoreInstance()
+    )
+
     private val _state = mutableStateOf(HomeState())
     val state get() = _state
-
-    private val userRepository =
-        UserRepository(FirebaseAuth.getInstance(), Injection.instance())
-
-    private var _posts = MutableLiveData<List<Post>>()
-    val posts get() = _posts
 
     init {
         getAllPosts()

@@ -18,7 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.trelloclone.R
+import com.varunkumar.echo_social_app.R
+import com.varunkumar.echo_social_app.ui.theme.whitesmoke
 import kotlinx.coroutines.delay
 
 @Composable
@@ -46,7 +47,7 @@ fun SplashScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primaryContainer),
+            .background(whitesmoke),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

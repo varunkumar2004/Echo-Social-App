@@ -1,24 +1,24 @@
 package com.varunkumar.echo_social_app.view
 
+import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.varunkumar.echo_social_app.Injection
+import com.varunkumar.echo_social_app.AppModule
 import com.varunkumar.echo_social_app.data.SearchRepository
 import com.varunkumar.echo_social_app.data.models.User
-import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
-@OptIn(FlowPreview::class)
 class SearchViewModel : ViewModel() {
-    private val searchRepository =
-        SearchRepository(FirebaseAuth.getInstance(), Injection.instance())
+    private val searchRepository: SearchRepository = SearchRepository(
+        AppModule.authInstance(),
+        AppModule.firestoreInstance()
+    )
 
-    private val _user = MutableStateFlow<User?>(null)
-    val user get() = _user.asStateFlow().debounce(500L)
+    private val _users = mutableStateOf<List<User>?>(null)
+    val users get() = _users
 
     private val _isSearching = MutableStateFlow(false)
     val isSearching = _isSearching.asStateFlow()
@@ -28,19 +28,18 @@ class SearchViewModel : ViewModel() {
 
     private fun searchUser() {
         viewModelScope.launch {
-            _user.value = searchRepository.searchUser(searchText.value)
+            _users.value = searchRepository.getAllUsers(_searchText.value)
         }
     }
 
     fun onSearchTextChange(text: String) {
         _searchText.value = text
-        searchUser()
     }
 
     fun onToggleSearch() {
-        _isSearching.value = !_isSearching.value
-        if (!_isSearching.value) {
-            onSearchTextChange("")
-        }
+        _isSearching.value = true
+        searchUser()
+        Log.d("search user", "${users.value}")
+        _isSearching.value = false
     }
 }

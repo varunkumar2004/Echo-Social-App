@@ -1,10 +1,10 @@
 package com.varunkumar.echo_social_app.data
 
 import android.net.Uri
-import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.varunkumar.echo_social_app.AppModule
 import com.varunkumar.echo_social_app.data.models.Comment
 import com.varunkumar.echo_social_app.data.models.Post
 import com.varunkumar.echo_social_app.data.models.User
@@ -14,6 +14,7 @@ import com.varunkumar.echo_social_app.utils.Constants.Companion.Users
 import com.varunkumar.echo_social_app.utils.Result
 import com.varunkumar.echo_social_app.utils.getCurrentTimestamp
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
 class PostRepository(
     private val auth: FirebaseAuth,
@@ -26,9 +27,9 @@ class PostRepository(
         val currentTimestamp = getCurrentTimestamp()
         var image: String? = null
 
-        email?.let {
+        email?.let { mail ->
             val user =
-                firestore.collection(Users).document(email).get().await().toObject(User::class.java)
+                firestore.collection(Users).document(mail).get().await().toObject(User::class.java)
 
             uri?.let {
                 image = postImage(uri)
@@ -116,7 +117,8 @@ class PostRepository(
 
     suspend fun deletePost(email: String, timestamp: String) {
         // delete from user collection
-        firestore.collection(Users).document(email).collection(Posts).document(timestamp).delete().await()
+        firestore.collection(Users).document(email).collection(Posts).document(timestamp).delete()
+            .await()
         firestore.collection(Posts).document(timestamp).delete().await()
     }
 

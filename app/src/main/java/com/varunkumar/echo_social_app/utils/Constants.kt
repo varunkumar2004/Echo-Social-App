@@ -11,24 +11,14 @@ class Constants {
         const val Users: String = "Users"
         const val Posts: String = "Posts"
         const val Comments: String = "Comments"
-        const val Profile: String = "pr"
+        const val profile_img: String = "profile_img"
+        const val Followers: String = "Followers"
+        const val Bookmarks: String = "Bookmarks"
     }
 }
 
-
-fun Context.createImageFile(): File {
-    val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-    val imageFileName = "JPEG_" + timestamp + "_"
-    return File.createTempFile(
-        imageFileName,
-        ".jpg",
-        externalCacheDir
-    )
-}
-
 fun getCurrentTimestamp(): String {
-    val date = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-    return date
+    return SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
 }
 
 fun extractTimestamp(time: String): String? {
