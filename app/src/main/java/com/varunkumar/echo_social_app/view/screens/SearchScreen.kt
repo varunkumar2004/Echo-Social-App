@@ -17,15 +17,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.ClearAll
-import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -87,7 +83,7 @@ fun SearchScreen(
                         .padding(top = 10.dp)
                         .clip(RoundedCornerShape(10.dp))
                 ) {
-                    items(res) {user ->
+                    items(res) { user ->
                         SearchItem(user = user, modifier = Modifier.fillMaxWidth()) {
                             navController.navigate(Routes.profile_screen.route + "/${user.email}")
                         }
@@ -110,7 +106,6 @@ fun SearchPreview() {
 fun SearchItem(
     user: User,
     modifier: Modifier,
-    buffered: Boolean = false,
     onClick: () -> Unit
 ) {
     val radius = RoundedCornerShape(40.dp)
@@ -129,11 +124,12 @@ fun SearchItem(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (!buffered) {
-                    ProfileImage(size = 40.dp)
-                    Spacer(modifier = Modifier.width(10.dp))
+                ProfileImage(size = 40.dp)
+                Spacer(modifier = Modifier.width(10.dp))
+                Column {
+                    Text(text = user.name)
+                    Text(text = user.email)
                 }
-                Text(text = user.email)
             }
         }
     }

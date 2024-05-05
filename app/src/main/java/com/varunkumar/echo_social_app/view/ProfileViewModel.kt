@@ -26,12 +26,14 @@ class ProfileViewModel : ViewModel() {
     private val _currProfileState = mutableStateOf(ProfileState())
     val currProfileState get() = _currProfileState
 
-
     private val _profileState = mutableStateOf(ProfileState())
     val profileState get() = _profileState
 
+    var showFollow = mutableStateOf(true)
+        private set
+
     init {
-        getCurrentUser()
+        getUser()
     }
 
     fun registerUser(user: User, password: String, image: Uri?) {
@@ -48,41 +50,37 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
-    fun getUser(email: String) {
+    fun getUser(email: String? = null) {
         viewModelScope.launch {
-            _profileState.value = _profileState.value.copy(
-                user = profileRepository.getUser(email)
-            )
+            if (email != null) {
+                _profileState.value = _profileState.value.copy(
+                    user = profileRepository.getUser(email)
+                )
 
-            getUserPosts(email)
+                getUserPosts(email)
+            } else {
+                _currProfileState.value = _currProfileState.value.copy(
+                    user = profileRepository.getUser()
+                )
+                getUserPosts()
+            }
         }
     }
 
-    private fun getUserPosts(email: String) {
+    private fun getUserPosts(email: String? = null) {
         viewModelScope.launch {
-            val posts = profileRepository.getUserPosts(email)
-            _profileState.value = _profileState.value.copy(
-                posts = posts, postCount = posts.size
-            )
-        }
-    }
-
-    private fun getPosts(email: String) {
-        viewModelScope.launch {
-            val posts = profileRepository.getUserPosts(email)
-            _currProfileState.value = _currProfileState.value.copy(
-                posts = posts, postCount = posts.size
-            )
-        }
-    }
-
-    fun getCurrentUser() {
-        viewModelScope.launch {
-            val user = profileRepository.getCurrentUser()
-            user?.let { getPosts(user.email) }
-            _currProfileState.value = _currProfileState.value.copy(
-                user = user
-            )
+            if (email != null) {
+                val posts = profileRepository.getUserPosts(email)
+                _profileState.value = _profileState.value.copy(
+                    posts = posts,
+                    postCount = posts.size
+                )
+            } else {
+                _currProfileState.value = _currProfileState.value.copy(
+                    user = profileRepository.getUser(),
+                    posts = profileRepository.getUserPosts(),
+                )
+            }
         }
     }
 
@@ -91,6 +89,11 @@ class ProfileViewModel : ViewModel() {
         _currProfileState.value = ProfileState()
     }
 
+    fun toggleFollow(email: String) {
+        showFollow.value = !(email == "1" || email == _currProfileState.value.user?.email)
+    }
+
+    // unfollow user function
     fun followUser(email: String) {
         viewModelScope.launch {
             profileRepository.followUser(email)

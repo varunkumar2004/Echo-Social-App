@@ -4,12 +4,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.varunkumar.echo_social_app.AppModule
-import com.varunkumar.echo_social_app.data.PostRepository
 import com.varunkumar.echo_social_app.data.UserRepository
 import com.varunkumar.echo_social_app.data.models.Post
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 class HomeViewModel  : ViewModel() {
     private val userRepository = UserRepository(

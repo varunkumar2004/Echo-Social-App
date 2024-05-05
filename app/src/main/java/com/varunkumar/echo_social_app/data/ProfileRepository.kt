@@ -39,10 +39,10 @@ class ProfileRepository(
 
     private suspend fun registerFirestore(user: User, image: Uri?): Result<Boolean> = try {
         val timestamp = getCurrentTimestamp()
-        val currUser = user.copy(timestamp = timestamp)
+        var currUser = user.copy(timestamp = timestamp)
 
         image?.let { img ->
-            currUser.copy(image = postProfilePicture(img))
+            currUser = currUser.copy(image = postProfilePicture(user, img))
         }
 
         firestore.collection(Users).document(user.email).set(currUser).await()
@@ -51,37 +51,31 @@ class ProfileRepository(
         Result.Error(e)
     }
 
-    private suspend fun postProfilePicture(uri: Uri): String {
+    private suspend fun postProfilePicture(user: User, uri: Uri): String {
         // TODO use a unique identifier for storing image as a path
-        val upload = storage.reference.child("$profile_img/${uri.lastPathSegment}")
+        val upload = storage.reference.child("$profile_img/${user.email + "_" + user.timestamp}")
         upload.putFile(uri).await()
         return upload.downloadUrl.await().toString()
     }
 
-    suspend fun getCurrentUser(): User? {
-        val uid = auth.currentUser?.email
-
-        uid?.let { email ->
-            return firestore.collection(Users).document(email).get().await()
-                .toObject(User::class.java)
+    suspend fun getUser(email: String? = auth.currentUser?.email): User? {
+        Log.d("email", "get user $email")
+        return email?.let { user ->
+            firestore.collection(Users)
+                .document(user).get().await().toObject(User::class.java)
         }
-
-        return null
     }
 
-    suspend fun getUser(email: String): User? {
-        return firestore.collection(Users).document(email).get().await().toObject(User::class.java)
-    }
-
-    suspend fun getUserPosts(email: String): List<Post> {
+    suspend fun getUserPosts(email: String? = auth.currentUser?.email): List<Post> {
         var posts = emptyList<Post>()
 
-        firestore.collection(Users).document(email).collection(Posts).get().await().forEach {
-            val post = it.toObject(Post::class.java)
-            posts = posts + post
+        if (email != null) {
+            firestore.collection(Users).document(email).collection(Posts).get().await().forEach {
+                val post = it.toObject(Post::class.java)
+                posts = posts + post
+            }
         }
 
-        // TODO reverse the list
         return posts
     }
 

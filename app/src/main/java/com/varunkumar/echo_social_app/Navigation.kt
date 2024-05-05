@@ -38,10 +38,10 @@ fun Navigation(
             SplashScreen(
                 alreadyLoggedIn = {
                     if (user != null) {
-                        Log.d("user", "$user")
+                        Log.d("user", "${user.email}")
                         navController.navigate(Routes.home_screen.route)
                     } else {
-                        Log.d("user", "$user")
+                        Log.d("user", user?.email?:"email")
                         navController.navigate(Routes.register_screen.route)
                     }
                 }
@@ -103,6 +103,7 @@ fun Navigation(
                 profileViewModel = profileViewModel,
                 email = it.arguments?.getString("email") ?: "-1",
                 loggingOut = {
+                    profileViewModel.logoutUser()
                     navController.navigate(Routes.register_screen.route)
                 },
                 backButton = {

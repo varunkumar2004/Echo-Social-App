@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -52,6 +51,9 @@ fun ProfileScreen(
     loggingOut: () -> Unit
 ) {
     // TODO restrict profile screen to edit only by correct user
+    profileViewModel.getUser()
+    profileViewModel.toggleFollow(email)
+
     val currState by profileViewModel.currProfileState
     val trailingIcon = if (email == "1") Icons.Default.Logout else null
 
@@ -76,7 +78,8 @@ fun ProfileScreen(
         ) {
             val modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
+//                .padding(start = 20.dp, end = 20.dp, bottom = 10.dp)
+                .padding(horizontal = 20.dp)
 
             if (email != "1") {
                 profileViewModel.getUser(email)
@@ -88,25 +91,23 @@ fun ProfileScreen(
                     user = state.user,
                     posts = state.posts,
                     postCount = state.postCount,
+                    showFollowButton = profileViewModel.showFollow.value,
                     onFollowClick = {
                         profileViewModel.followUser(email)
                     }
                 )
             } else {
-                // user currently logged in app session
-                profileViewModel.getCurrentUser()
-
                 ProfileSection(
                     navController = navController,
                     modifier = modifier,
                     user = currState.user,
                     posts = currState.posts,
                     postCount = currState.postCount,
-                    isCurrUser = true,
+                    showFollowButton = profileViewModel.showFollow.value,
                     onDeletePost = { timestamp ->
                         currState.user?.let { user ->
                             postViewModel.deletePost(user.email, timestamp = timestamp)
-                            profileViewModel.getCurrentUser()
+                            profileViewModel.getUser()
                         }
                     }
                 )
@@ -122,7 +123,7 @@ fun ProfileSection(
     user: User?,
     posts: List<Post>,
     postCount: Int,
-    isCurrUser: Boolean = false,
+    showFollowButton: Boolean,
     onFollowClick: () -> Unit = {},
     onDeletePost: (String) -> Unit = {}
 ) {
@@ -142,8 +143,9 @@ fun ProfileSection(
                         size = 40.dp,
                         uri = user?.image
                     )
+
                     Spacer(modifier = Modifier.width(10.dp))
-                    // TODO change email to name
+
                     Column {
                         user?.let {
                             Text(text = user.name, style = MaterialTheme.typography.bodyLarge)
@@ -153,7 +155,7 @@ fun ProfileSection(
                     }
                 }
 
-                if (!isCurrUser) {
+                if (showFollowButton) {
                     Button(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = whitesmoke,
@@ -181,29 +183,20 @@ fun ProfileSection(
                 Spacer(modifier = Modifier.height(10.dp))
             }
 
+
             val timestamp = user?.timestamp?.let { extractTimestamp(it) }
-            val nationality = user?.nationality
 
-            Row {
-                Text(
-                    text = "Signed On $timestamp",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.DarkGray,
-                )
-
-                if (nationality != null) {
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text(text = "·", fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.width(5.dp))
+            timestamp?.let { time ->
+                Row {
                     Text(
-                        text = user.nationality,
+                        text = "Signed On $time",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.DarkGray
+                        color = Color.DarkGray,
                     )
                 }
-            }
 
-            Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(10.dp))
+            }
 
             user?.let {
                 Row(
@@ -212,18 +205,18 @@ fun ProfileSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // TODO correct counters for each
-                    CounterRow(label = "Posts", value = postCount)
+                    CounterRow(label = "Posts", value = posts.size)
                     CounterRow(label = "Followers", value = user.followers)
                 }
+
+                Spacer(modifier = Modifier.height(10.dp))
             }
         }
-
-        Divider()
 
         PostsSection(
             navController = navController,
             posts = posts,
-            isCurrUser = isCurrUser,
+            isCurrUser = !showFollowButton,
             onDeletePost = {
                 onDeletePost(it)
             }
