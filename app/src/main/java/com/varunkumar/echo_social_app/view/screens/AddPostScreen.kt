@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -93,7 +94,7 @@ fun AddPostScreen(
                 onValueChange = {
                     caption = it
                 },
-                label = { Text(text = "Caption") },
+                placeholder = { Text(text = "Caption") },
                 trailingIcon = {
                     IconButton(
                         onClick = {
@@ -109,7 +110,7 @@ fun AddPostScreen(
                             }
                         }
                     ) {
-                        Icon(imageVector = Icons.Outlined.Send, contentDescription = null)
+                        Icon(imageVector = Icons.Outlined.ArrowForward, contentDescription = null)
                     }
                 }
             )

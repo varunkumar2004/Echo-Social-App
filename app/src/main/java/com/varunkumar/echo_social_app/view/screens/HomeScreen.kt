@@ -220,8 +220,10 @@ fun ProfileImage(
     modifier: Modifier = Modifier,
     isProfile: Boolean = true,
     size: Dp,
-    uri: Any? = null
+    uri: String? = null
 ) {
+    val newmodifier = Modifier.fillMaxWidth()
+
     Box(
         modifier = modifier
             .size(size)
@@ -233,15 +235,17 @@ fun ProfileImage(
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(
-                            Alignment.Center
-                        )
+                    modifier = newmodifier
+                        .align(Alignment.Center)
                 )
             }
         } else {
-            AsyncImage(model = uri, contentDescription = null)
+            AsyncImage(
+                modifier = newmodifier
+                    .align(Alignment.Center),
+                model = uri,
+                contentDescription = null
+            )
         }
     }
 }

@@ -4,7 +4,6 @@ import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.varunkumar.echo_social_app.AppModule
 import com.varunkumar.echo_social_app.data.models.Comment
 import com.varunkumar.echo_social_app.data.models.Post
 import com.varunkumar.echo_social_app.data.models.User
@@ -14,7 +13,6 @@ import com.varunkumar.echo_social_app.utils.Constants.Companion.Users
 import com.varunkumar.echo_social_app.utils.Result
 import com.varunkumar.echo_social_app.utils.getCurrentTimestamp
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
 
 class PostRepository(
     private val auth: FirebaseAuth,
@@ -89,7 +87,6 @@ class PostRepository(
                     .await()
             }
         }
-
 
         Result.Success(true)
     } catch (e: Exception) {
