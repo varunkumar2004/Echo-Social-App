@@ -8,6 +8,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.varunkumar.echo_social_app.data.models.Follower
 import com.varunkumar.echo_social_app.data.models.Post
 import com.varunkumar.echo_social_app.data.models.User
+import com.varunkumar.echo_social_app.utils.Constants.Companion.Bookmarks
 import com.varunkumar.echo_social_app.utils.Constants.Companion.Followers
 import com.varunkumar.echo_social_app.utils.Constants.Companion.Posts
 import com.varunkumar.echo_social_app.utils.Constants.Companion.Users
@@ -86,6 +87,20 @@ class ProfileRepository(
         Result.Error(e)
     }
 
+    suspend fun getBookmarks() : List<Post> {
+        val user = auth.currentUser?.email
+        val posts = mutableListOf<Post>()
+
+        user?.let {
+            firestore.collection(Users).document(it).collection(Bookmarks).get().await().forEach {snapshot ->
+                val post = snapshot.toObject(Post::class.java)
+                posts.add(post)
+            }
+        }
+
+        return posts
+    }
+
     suspend fun followUser(email: String) {
         val currUser = auth.currentUser?.email
         currUser?.let { curr ->
@@ -104,5 +119,18 @@ class ProfileRepository(
                 Log.d("Error", "Couldn't follow the user")
             }
         }
+    }
+
+    suspend fun deleteAccount() {
+        val user = auth.currentUser?.email
+
+        auth.currentUser?.delete()
+
+        user?.let {
+            firestore.collection(Users).document(it).delete().await()
+            auth.currentUser?.delete()?.await()
+        }
+
+        logoutUser()
     }
 }

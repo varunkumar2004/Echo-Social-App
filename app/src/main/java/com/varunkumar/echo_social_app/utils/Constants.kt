@@ -1,7 +1,5 @@
 package com.varunkumar.echo_social_app.utils
 
-import android.content.Context
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

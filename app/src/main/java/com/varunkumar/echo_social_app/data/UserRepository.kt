@@ -17,9 +17,9 @@ class UserRepository(
         currUser?.let { curr ->
             firestore.collection(Posts).get().await().forEach {
                 val post = it.toObject(Post::class.java)
-                if (post.email != curr) {
+//                if (post.email != curr) {
                     posts = posts + post
-                }
+//                }
             }
         }
 

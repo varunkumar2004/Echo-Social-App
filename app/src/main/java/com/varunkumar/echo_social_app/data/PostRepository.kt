@@ -7,6 +7,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.varunkumar.echo_social_app.data.models.Comment
 import com.varunkumar.echo_social_app.data.models.Post
 import com.varunkumar.echo_social_app.data.models.User
+import com.varunkumar.echo_social_app.utils.Constants.Companion.Bookmarks
 import com.varunkumar.echo_social_app.utils.Constants.Companion.Comments
 import com.varunkumar.echo_social_app.utils.Constants.Companion.Posts
 import com.varunkumar.echo_social_app.utils.Constants.Companion.Users
@@ -40,7 +41,8 @@ class PostRepository(
                         email = user.email,
                         caption = caption,
                         timestamp = currentTimestamp,
-                        image = image
+                        image = image,
+                        profile_image = user.image
                     )
 
                 // TODO change to this identifier instead of only timestamp
@@ -108,8 +110,21 @@ class PostRepository(
         return comments
     }
 
-    suspend fun bookmarkPost() {
+    suspend fun bookmarkPost(post: Post): Result<Boolean> = try {
+        val user = auth.currentUser?.email
 
+        user?.let {
+            val header = post.email + "_" + post.timestamp
+
+            firestore.collection(Users).document(it).collection(Bookmarks).document(header)
+                .set(post).await()
+
+//            firestore.collection(Users).document(post.email).collection()
+        }
+
+        Result.Success(true)
+    } catch (e: Exception) {
+        Result.Error(e)
     }
 
     suspend fun deletePost(email: String, timestamp: String) {

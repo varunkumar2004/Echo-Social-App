@@ -108,7 +108,7 @@ fun SearchItem(
     modifier: Modifier,
     onClick: () -> Unit
 ) {
-    val radius = RoundedCornerShape(40.dp)
+    val radius = RoundedCornerShape(10.dp)
     Box(
         modifier = modifier
             .clip(radius)
@@ -124,7 +124,7 @@ fun SearchItem(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ProfileImage(size = 40.dp)
+                ProfileImage(size = 40.dp, uri = user.image)
                 Spacer(modifier = Modifier.width(10.dp))
                 Column {
                     Text(text = user.name)

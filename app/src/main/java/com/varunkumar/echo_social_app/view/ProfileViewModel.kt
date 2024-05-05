@@ -2,6 +2,7 @@ package com.varunkumar.echo_social_app.view
 
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -30,6 +31,9 @@ class ProfileViewModel : ViewModel() {
     val profileState get() = _profileState
 
     var showFollow = mutableStateOf(true)
+        private set
+
+    var selectedTabIndex = mutableIntStateOf(0)
         private set
 
     init {
@@ -62,7 +66,9 @@ class ProfileViewModel : ViewModel() {
                 _currProfileState.value = _currProfileState.value.copy(
                     user = profileRepository.getUser()
                 )
+
                 getUserPosts()
+                getBookmarks()
             }
         }
     }
@@ -72,8 +78,7 @@ class ProfileViewModel : ViewModel() {
             if (email != null) {
                 val posts = profileRepository.getUserPosts(email)
                 _profileState.value = _profileState.value.copy(
-                    posts = posts,
-                    postCount = posts.size
+                    posts = posts
                 )
             } else {
                 _currProfileState.value = _currProfileState.value.copy(
@@ -85,12 +90,17 @@ class ProfileViewModel : ViewModel() {
     }
 
     fun logoutUser() {
-        _authResult.value = profileRepository.logoutUser()
         _currProfileState.value = ProfileState()
+        _profileState.value = ProfileState()
+        _authResult.value = profileRepository.logoutUser()
     }
 
     fun toggleFollow(email: String) {
         showFollow.value = !(email == "1" || email == _currProfileState.value.user?.email)
+    }
+
+    fun selectTab(index: Int) {
+        selectedTabIndex.intValue = index
     }
 
     // unfollow user function
@@ -99,10 +109,30 @@ class ProfileViewModel : ViewModel() {
             profileRepository.followUser(email)
         }
     }
+
+    fun getBookmarks() {
+        viewModelScope.launch {
+            val bookmarks = profileRepository.getBookmarks()
+
+            _currProfileState.value = _currProfileState.value.copy(
+                bookmarks = bookmarks
+            )
+
+            Log.d("bookmarks", bookmarks.toString())
+        }
+    }
+
+    fun deleteAccount() {
+        viewModelScope.launch {
+            profileRepository.deleteAccount()
+            _currProfileState.value = ProfileState()
+            _profileState.value = ProfileState()
+        }
+    }
 }
 
 data class ProfileState(
     val user: User? = null,
     val posts: List<Post> = emptyList(),
-    val postCount: Int = 0
+    val bookmarks: List<Post>? = null
 )

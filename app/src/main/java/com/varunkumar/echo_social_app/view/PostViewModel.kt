@@ -62,6 +62,12 @@ class PostViewModel : ViewModel() {
         }
     }
 
+    fun bookmarkPost(post: Post) {
+        viewModelScope.launch {
+            postRepository.bookmarkPost(post)
+        }
+    }
+
     fun clearPost() {
         _post.value = null
         _comments.value = emptyList()

@@ -12,18 +12,23 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -75,6 +80,19 @@ fun HomeScreen(
                 header = "Echo"
             )
         },
+        floatingActionButton = {
+            FloatingActionButton(
+                backgroundColor = whitesmoke,
+                contentColor = Color.Black,
+                shape = CircleShape,
+                onClick = homeViewModel::getAllPosts
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "Profile"
+                )
+            }
+        }
     ) {
         Box(modifier = Modifier.padding(it)) {
             LazyColumn(
@@ -93,7 +111,10 @@ fun HomeScreen(
                             .clickable {
                                 navController.navigate(Routes.post_screen.route + "/${post.timestamp}")
                             },
-                        navController = navController
+                        navController = navController,
+                        onBookmarkPost = {
+                            postViewModel.bookmarkPost(post)
+                        }
                     )
                 }
             }

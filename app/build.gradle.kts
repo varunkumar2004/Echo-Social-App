@@ -56,6 +56,7 @@ android {
 dependencies {
     implementation("androidx.compose.runtime:runtime:1.6.4")
     implementation("androidx.compose.runtime:runtime-livedata:1.6.4")
+    implementation(libs.androidx.material3.android)
 
     val lifecycle_version = "2.7.0"
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycle_version")
@@ -68,7 +69,7 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
+//    implementation("androidx.compose.material3:material3")
     implementation("com.google.firebase:firebase-auth:22.3.1")
     implementation("com.google.firebase:firebase-firestore:24.10.2")
     implementation("com.google.firebase:firebase-storage:20.3.0")

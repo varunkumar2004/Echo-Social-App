@@ -18,16 +18,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -91,10 +92,8 @@ fun AddPostScreen(
             TextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = caption,
-                onValueChange = {
-                    caption = it
-                },
-                placeholder = { Text(text = "Caption") },
+                label = { Text(text = "Caption") },
+                onValueChange = { caption = it },
                 trailingIcon = {
                     IconButton(
                         onClick = {
@@ -119,14 +118,14 @@ fun AddPostScreen(
         Box(
             modifier = modifier
                 .aspectRatio(1f)
-                .clip(RoundedCornerShape(40.dp))
+                .clip(RoundedCornerShape(10.dp))
                 .background(Color.LightGray)
         ) {
             if (!selected) {
                 Box(
                     modifier = modifier
                         .padding(10.dp)
-                        .clip(RoundedCornerShape(40.dp))
+                        .clip(RoundedCornerShape(10.dp))
                         .background(Color.DarkGray)
                         .clickable {
                             selectedPhoto()

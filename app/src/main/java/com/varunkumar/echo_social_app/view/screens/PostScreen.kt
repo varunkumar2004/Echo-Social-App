@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -114,7 +113,10 @@ fun PostScreen(
                     modifier = Modifier.padding(horizontal = 15.dp),
                     post = post,
                     navController = navController,
-                    isCurrUser = false
+                    isCurrUser = false,
+                    onBookmarkPost = {
+                        postViewModel.bookmarkPost(post)
+                    }
                 )
             }
 
@@ -184,7 +186,8 @@ fun ActualPost(
     modifier: Modifier,
     post: Post,
     navController: NavController,
-    onDeletePost: (String) -> Unit = {}
+    onDeletePost: (String) -> Unit = {},
+    onBookmarkPost: () -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -208,7 +211,8 @@ fun ActualPost(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     ProfileImage(
-                        size = 40.dp
+                        size = 40.dp,
+                        uri = post.profile_image
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {
@@ -247,10 +251,12 @@ fun ActualPost(
                                     contentDescription = null
                                 )
                             }
-                        }, onClick = {
-                            // TODO bookmark this post
-                            // might need postViewModel or profileViewModel
-                        })
+                        },
+                            onClick = {
+                                expanded = false
+                                onBookmarkPost()
+                            }
+                        )
 
                         if (!isCurrUser) {
                             DropdownMenuItem(text = {
@@ -319,10 +325,7 @@ fun ActualPost(
                 horizontalArrangement = Arrangement.spacedBy(5.dp)
             ) {
                 val extractTime = extractTimestamp(post.timestamp)
-                Text(text = extractTime ?: "", fontStyle = FontStyle.Italic)
-                Text(text = "·", fontWeight = FontWeight.Bold)
-
-                Text(text = "Bookmarks: ${post.bookmarks}", fontStyle = FontStyle.Italic)
+                Text(text = extractTime ?: "")
             }
         }
     }
@@ -372,13 +375,11 @@ fun CommentPreview(
                 val extractTime = extractTimestamp(comment.timestamp)
                 Text(
                     text = extractTime ?: "",
-                    fontStyle = FontStyle.Italic,
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.DarkGray
                 )
             }
 
-            Spacer(modifier = Modifier.height(5.dp))
             Text(text = comment.comment, style = MaterialTheme.typography.bodyMedium)
         }
     }
