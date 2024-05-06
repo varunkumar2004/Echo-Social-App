@@ -8,11 +8,11 @@ import com.google.firebase.storage.FirebaseStorage
 import com.varunkumar.echo_social_app.data.models.Follower
 import com.varunkumar.echo_social_app.data.models.Post
 import com.varunkumar.echo_social_app.data.models.User
-import com.varunkumar.echo_social_app.utils.Constants.Companion.Bookmarks
-import com.varunkumar.echo_social_app.utils.Constants.Companion.Followers
-import com.varunkumar.echo_social_app.utils.Constants.Companion.Posts
-import com.varunkumar.echo_social_app.utils.Constants.Companion.Users
-import com.varunkumar.echo_social_app.utils.Constants.Companion.profile_img
+import com.varunkumar.echo_social_app.utils.Constants.Companion.BOOKMARKS
+import com.varunkumar.echo_social_app.utils.Constants.Companion.FOLLOWERS
+import com.varunkumar.echo_social_app.utils.Constants.Companion.POSTS
+import com.varunkumar.echo_social_app.utils.Constants.Companion.USERS
+import com.varunkumar.echo_social_app.utils.Constants.Companion.PROFILEIMG
 import com.varunkumar.echo_social_app.utils.Result
 import com.varunkumar.echo_social_app.utils.getCurrentTimestamp
 import kotlinx.coroutines.tasks.await
@@ -46,7 +46,7 @@ class ProfileRepository(
             currUser = currUser.copy(image = postProfilePicture(user, img))
         }
 
-        firestore.collection(Users).document(user.email).set(currUser).await()
+        firestore.collection(USERS).document(user.email).set(currUser).await()
         Result.Success(true)
     } catch (e: Exception) {
         Result.Error(e)
@@ -54,7 +54,7 @@ class ProfileRepository(
 
     private suspend fun postProfilePicture(user: User, uri: Uri): String {
         // TODO use a unique identifier for storing image as a path
-        val upload = storage.reference.child("$profile_img/${user.email + "_" + user.timestamp}")
+        val upload = storage.reference.child("$PROFILEIMG/${user.email + "_" + user.timestamp}")
         upload.putFile(uri).await()
         return upload.downloadUrl.await().toString()
     }
@@ -62,7 +62,7 @@ class ProfileRepository(
     suspend fun getUser(email: String? = auth.currentUser?.email): User? {
         Log.d("email", "get user $email")
         return email?.let { user ->
-            firestore.collection(Users)
+            firestore.collection(USERS)
                 .document(user).get().await().toObject(User::class.java)
         }
     }
@@ -71,7 +71,7 @@ class ProfileRepository(
         var posts = emptyList<Post>()
 
         if (email != null) {
-            firestore.collection(Users).document(email).collection(Posts).get().await().forEach {
+            firestore.collection(USERS).document(email).collection(POSTS).get().await().forEach {
                 val post = it.toObject(Post::class.java)
                 posts = posts + post
             }
@@ -92,7 +92,7 @@ class ProfileRepository(
         val posts = mutableListOf<Post>()
 
         user?.let {
-            firestore.collection(Users).document(it).collection(Bookmarks).get().await().forEach {snapshot ->
+            firestore.collection(USERS).document(it).collection(BOOKMARKS).get().await().forEach { snapshot ->
                 val post = snapshot.toObject(Post::class.java)
                 posts.add(post)
             }
@@ -106,14 +106,14 @@ class ProfileRepository(
         currUser?.let { curr ->
             val follower = Follower(curr)
 
-            firestore.collection(Users).document(email).collection(Followers).document(curr)
+            firestore.collection(USERS).document(email).collection(FOLLOWERS).document(curr)
                 .set(follower).await()
 
             try {
-                val totalFollowers = firestore.collection(Users)
-                    .document(email).collection(Followers).get().await().size()
+                val totalFollowers = firestore.collection(USERS)
+                    .document(email).collection(FOLLOWERS).get().await().size()
 
-                firestore.collection(Users).document(email).update("followers", totalFollowers)
+                firestore.collection(USERS).document(email).update("followers", totalFollowers)
                     .await()
             } catch (e: Exception) {
                 Log.d("Error", "Couldn't follow the user")
@@ -127,7 +127,7 @@ class ProfileRepository(
         auth.currentUser?.delete()
 
         user?.let {
-            firestore.collection(Users).document(it).delete().await()
+            firestore.collection(USERS).document(it).delete().await()
             auth.currentUser?.delete()?.await()
         }
 

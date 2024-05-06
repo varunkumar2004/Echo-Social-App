@@ -6,12 +6,12 @@ import java.util.Locale
 
 class Constants {
     companion object {
-        const val Users: String = "Users"
-        const val Posts: String = "Posts"
-        const val Comments: String = "Comments"
-        const val profile_img: String = "profile_img"
-        const val Followers: String = "Followers"
-        const val Bookmarks: String = "Bookmarks"
+        const val USERS: String = "Users"
+        const val POSTS: String = "Posts"
+        const val COMMENTS: String = "Comments"
+        const val PROFILEIMG: String = "profile_img"
+        const val FOLLOWERS: String = "Followers"
+        const val BOOKMARKS: String = "Bookmarks"
     }
 }
 

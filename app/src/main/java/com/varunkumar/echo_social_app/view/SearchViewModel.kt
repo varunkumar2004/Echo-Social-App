@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 class SearchViewModel : ViewModel() {
     private val searchRepository: SearchRepository = SearchRepository(
-        AppModule.authInstance(),
+//        AppModule.authInstance(),
         AppModule.firestoreInstance()
     )
 

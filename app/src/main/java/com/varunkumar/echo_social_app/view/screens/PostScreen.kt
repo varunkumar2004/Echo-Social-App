@@ -16,13 +16,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.outlined.BookmarkAdd
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.Link
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,8 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -87,7 +85,7 @@ fun PostScreen(
         Box(contentAlignment = Alignment.CenterStart) {
             ActionBar(
                 modifier = Modifier.fillMaxWidth(),
-                leadingIcon = Icons.Default.ArrowBack,
+                leadingIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 header = "Post",
                 onClickLeadingIcon = { backToHome() }
             )
@@ -133,7 +131,7 @@ fun PostScreen(
                 mutableStateOf("")
             }
 
-            AlertDialog(
+            BasicAlertDialog(
                 onDismissRequest = { showCommentDialog = false },
                 modifier = modifier
                     .clip(RoundedCornerShape(20.dp))
@@ -148,7 +146,9 @@ fun PostScreen(
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text(text = "Comment") },
                         value = newComment,
-                        onValueChange = { newComment = it }
+                        onValueChange = { str ->
+                            newComment = str
+                        }
                     )
 
                     Spacer(modifier = Modifier.height(10.dp))
@@ -212,7 +212,7 @@ fun ActualPost(
                 ) {
                     ProfileImage(
                         size = 40.dp,
-                        uri = post.profile_image
+                        uri = post.profileImage
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {

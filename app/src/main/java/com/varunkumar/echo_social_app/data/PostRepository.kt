@@ -7,10 +7,10 @@ import com.google.firebase.storage.FirebaseStorage
 import com.varunkumar.echo_social_app.data.models.Comment
 import com.varunkumar.echo_social_app.data.models.Post
 import com.varunkumar.echo_social_app.data.models.User
-import com.varunkumar.echo_social_app.utils.Constants.Companion.Bookmarks
-import com.varunkumar.echo_social_app.utils.Constants.Companion.Comments
-import com.varunkumar.echo_social_app.utils.Constants.Companion.Posts
-import com.varunkumar.echo_social_app.utils.Constants.Companion.Users
+import com.varunkumar.echo_social_app.utils.Constants.Companion.BOOKMARKS
+import com.varunkumar.echo_social_app.utils.Constants.Companion.COMMENTS
+import com.varunkumar.echo_social_app.utils.Constants.Companion.POSTS
+import com.varunkumar.echo_social_app.utils.Constants.Companion.USERS
 import com.varunkumar.echo_social_app.utils.Result
 import com.varunkumar.echo_social_app.utils.getCurrentTimestamp
 import kotlinx.coroutines.tasks.await
@@ -28,7 +28,7 @@ class PostRepository(
 
         email?.let { mail ->
             val user =
-                firestore.collection(Users).document(mail).get().await().toObject(User::class.java)
+                firestore.collection(USERS).document(mail).get().await().toObject(User::class.java)
 
             uri?.let {
                 image = postImage(uri)
@@ -42,27 +42,27 @@ class PostRepository(
                         caption = caption,
                         timestamp = currentTimestamp,
                         image = image,
-                        profile_image = user.image
+                        profileImage = user.image
                     )
 
                 // TODO change to this identifier instead of only timestamp
-                val identifier: String = "${email}_${currentTimestamp}"
+//                val identifier = "${email}_${currentTimestamp}"
 
-                firestore.collection(Users).document(email)
-                    .collection(Posts)
+                firestore.collection(USERS).document(email)
+                    .collection(POSTS)
                     .document(currentTimestamp).set(post).await()
 
-                firestore.collection(Posts).document(currentTimestamp).set(post).await()
+                firestore.collection(POSTS).document(currentTimestamp).set(post).await()
             }
         }
 
-        Result.Success(false)
+        Result.Success(true)
     } catch (e: Exception) {
         Result.Error(e)
     }
 
     suspend fun getPost(timestamp: String): Post? {
-        val result = firestore.collection(Posts).document(timestamp).get().await()
+        val result = firestore.collection(POSTS).document(timestamp).get().await()
         return result.toObject(Post::class.java)
     }
 
@@ -71,7 +71,7 @@ class PostRepository(
 
         email?.let {
             val user =
-                firestore.collection(Users).document(email).get().await().toObject(User::class.java)
+                firestore.collection(USERS).document(email).get().await().toObject(User::class.java)
             user?.let {
                 val commentInstance = Comment(
                     comment = comment,
@@ -81,9 +81,9 @@ class PostRepository(
                     user = post.email
                 )
 
-                firestore.collection(Posts)
+                firestore.collection(POSTS)
                     .document(post.timestamp)
-                    .collection(Comments)
+                    .collection(COMMENTS)
                     .document(getCurrentTimestamp())
                     .set(commentInstance)
                     .await()
@@ -98,9 +98,9 @@ class PostRepository(
     suspend fun getAllComments(post: Post): List<Comment> {
         var comments = listOf<Comment>()
 
-        firestore.collection(Posts)
+        firestore.collection(POSTS)
             .document(post.timestamp)
-            .collection(Comments)
+            .collection(COMMENTS)
             .get()
             .await()
             .forEach {
@@ -116,7 +116,7 @@ class PostRepository(
         user?.let {
             val header = post.email + "_" + post.timestamp
 
-            firestore.collection(Users).document(it).collection(Bookmarks).document(header)
+            firestore.collection(USERS).document(it).collection(BOOKMARKS).document(header)
                 .set(post).await()
 
 //            firestore.collection(Users).document(post.email).collection()
@@ -129,9 +129,9 @@ class PostRepository(
 
     suspend fun deletePost(email: String, timestamp: String) {
         // delete from user collection
-        firestore.collection(Users).document(email).collection(Posts).document(timestamp).delete()
+        firestore.collection(USERS).document(email).collection(POSTS).document(timestamp).delete()
             .await()
-        firestore.collection(Posts).document(timestamp).delete().await()
+        firestore.collection(POSTS).document(timestamp).delete().await()
     }
 
     private suspend fun postImage(uri: Uri): String {

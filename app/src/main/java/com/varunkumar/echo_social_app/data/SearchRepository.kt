@@ -1,24 +1,22 @@
 package com.varunkumar.echo_social_app.data
 
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.varunkumar.echo_social_app.data.models.User
-import com.varunkumar.echo_social_app.utils.Constants.Companion.Users
+import com.varunkumar.echo_social_app.utils.Constants.Companion.USERS
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
 
 class SearchRepository (
-    private val auth: FirebaseAuth,
+//    private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore
 ) {
-    suspend fun searchUser(email: String): User? {
-        val user = firestore.collection(Users).document(email).get().await()
-        return user.toObject(User::class.java)
-    }
+//    suspend fun searchUser(email: String): User? {
+//        val user = firestore.collection(Users).document(email).get().await()
+//        return user.toObject(User::class.java)
+//    }
 
     suspend fun getAllUsers(name: String): List<User> {
         val users = mutableListOf<User>()
-        val result = firestore.collection(Users).get().await()
+        val result = firestore.collection(USERS).get().await()
 
         for (document in result) {
             val user = document.toObject(User::class.java)
